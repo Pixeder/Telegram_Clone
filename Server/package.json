@@ -1,0 +1,35 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "Telegram Backened",
+  "keywords": [
+    "Backened",
+    "Express"
+  ],
+  "homepage": "https://github.com/Pixeder/Telegram_Clone#readme",
+  "bugs": {
+    "url": "https://github.com/Pixeder/Telegram_Clone/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Pixeder/Telegram_Clone.git"
+  },
+  "license": "ISC",
+  "author": "Vinay Kumar",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon -r dotenv/config --experimental-json-modules src/index.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
