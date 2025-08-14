@@ -1,17 +1,23 @@
-import { User } from "../models/user.model";
-import { asynHandler } from "../utils/AsyncHandler.js";
+import { User } from "../models/user.model.js";
+import { asyncHandler } from "../utils/AsyncHandler.js";
 import { apiError } from "../utils/ApiError.js";
 import { apiResponse } from "../utils/ApiResponse.js";
 
+const options = {
+    httpOnly: true,
+    secure: true,
+  }
+
 const generateAccessAndRefreshToken = async (userId) => {
   try {
-    const user = await User.findById(userId);
+    const user = await User.findOne(userId);
   
     if (!user){
       throw new apiError(404 , "Invalid User Request")
     }
-    const accessToken = user.generateAccessToken(id);
-    const refreshToken = user.generateRefreshToken(id);
+
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
 
     user.refreshToken = refreshToken;
     await user.save({validateBeforeSave: false});
@@ -21,12 +27,12 @@ const generateAccessAndRefreshToken = async (userId) => {
       refreshToken,
     };
   } catch (error) {
-      throw new ApiError(500,"Something went wrong while genrating refresh and access tokens")
+      throw new apiError(500,error.message || "Something went wrong while genrating refresh and access tokens")
   }
 
 }
 
-const registerUser = asynHandler( async (req , res) => {
+const registerUser = asyncHandler( async (req , res) => {
   const {username , email , password} = req.body;
 
   if([username , email , password].some((field) => (field?.trim() === "" ))){
@@ -51,8 +57,9 @@ const registerUser = asynHandler( async (req , res) => {
 
   const createdUser = user.toObject()
   delete createdUser.password
+    delete createdUser.refreshToken
 
-  if (!userToReturn) {
+  if (!createdUser) {
         throw new ApiError(500, "Something went wrong while registering the user");
     }
 
@@ -65,26 +72,28 @@ const registerUser = asynHandler( async (req , res) => {
 
 })
 
-const loginUser = asynHandler( async (req , res) => {
+const loginUser = asyncHandler( async (req , res) => {
   const {email , password} = req.body;
 
   if([email , password].some((field) => field?.trim() === "")){
     throw new apiError(400 , "All fields are required")
   }
 
-  const isPasswordCorrect = await User.ispasswordCorrect(password)
+  
+  const user = await User.findOne({email})
+  
+  if(!user){
+    throw new apiError(404 , "Anauthorized user")
+  }
+  
+  const isPasswordCorrect = await user.isPasswordCorrect(password)
 
   if(!isPasswordCorrect){
     throw new apiError(401 , "Invalid credentials")
   }
-
-  const user = await User.findOne({email})
-
-  if(!user){
-    throw new apiError(404 , "Anauthorized user")
-  }
-
-  const createdUser = await User.findById(user?._id).select("-password")
+  const createdUser = user.toObject()
+  delete createdUser.password
+  delete createdUser.refreshToken
 
   if(!createdUser){
     throw new apiError(400 , "Something went wrong in logging in user")
@@ -96,11 +105,6 @@ const loginUser = asynHandler( async (req , res) => {
     throw new apiError(500 , "Something went wrong in getting access and refresh tokens")
   }
 
-  const options = {
-    httpOnly: true,
-    secure: true,
-  }
-
   return res
     .status(200)
     .cookie("accessToken" , accessToken , options)
@@ -109,9 +113,31 @@ const loginUser = asynHandler( async (req , res) => {
       new apiResponse(200 , createdUser , "User logged in successfully")
     )
 
-  })
+})
+
+const logoutUser = asyncHandler( async (req , res) => {
+  await User.findByIdAndUpdate(
+    req.user?._id ,
+    {
+      $set: {refreshToken : undefined}
+    },
+    {
+      new: true,
+    }
+  )
+
+  return res
+    .status(200)
+    .clearCookie("accessToken" , options)
+    .clearCookie("refreshToken" , options)
+    .json(
+      new apiResponse(200 , {} , "User logged out successfully")
+    )
+
+})
 
 export {
   registerUser,
   loginUser,
+  logoutUser,
 }
