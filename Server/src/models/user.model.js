@@ -33,7 +33,10 @@ const userSchema = Schema({
             type: String,
             minlength: 8,
         },
-        
+        refreshToken: {
+            type: String,
+            default: ''
+        }
     }
     ,{timestamps: true}
 )
