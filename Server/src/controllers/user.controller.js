@@ -16,8 +16,8 @@ const generateAccessAndRefreshToken = async (userId) => {
       throw new apiError(404 , "Invalid User Request")
     }
 
-    const accessToken = user.generateAccessToken();
-    const refreshToken = user.generateRefreshToken();
+    const accessToken = await user.generateAccessToken();
+    const refreshToken = await user.generateRefreshToken();
 
     user.refreshToken = refreshToken;
     await user.save({validateBeforeSave: false});
@@ -63,7 +63,6 @@ const registerUser = asyncHandler( async (req , res) => {
         throw new ApiError(500, "Something went wrong while registering the user");
     }
 
-
   return res
     .status(201)
     .json(
@@ -83,7 +82,7 @@ const loginUser = asyncHandler( async (req , res) => {
   const user = await User.findOne({email})
   
   if(!user){
-    throw new apiError(404 , "Anauthorized user")
+    throw new apiError(404 , "User with entered email not exist")
   }
   
   const isPasswordCorrect = await user.isPasswordCorrect(password)

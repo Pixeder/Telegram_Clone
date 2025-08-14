@@ -7,7 +7,7 @@ const userRouter = Router()
 
 userRouter.route('/register').post(registerUser)
 userRouter.route('/login').post(loginUser)
-userRouter.route('/logout').get(verifyJWT , logoutUser)
+userRouter.route('/logout').post(verifyJWT , logoutUser)
 
 
 export default userRouter
