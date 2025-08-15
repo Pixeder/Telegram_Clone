@@ -18,4 +18,8 @@ import userRouter from './routes/user.routes.js'
 
 app.use('/api/v1/users', userRouter)
 
+import messageRouter from './routes/message.route.js'
+
+app.use('/api/v1/messages', messageRouter)
+
 export { app }
