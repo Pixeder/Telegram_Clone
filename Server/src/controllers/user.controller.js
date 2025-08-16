@@ -139,8 +139,23 @@ const logoutUser = asyncHandler( async (req , res) => {
 
 })
 
+const getUsersList = asyncHandler( async (req , res) => {
+
+  const usersList = await User.find({
+    _id: { $ne : req.user?._id}
+  }).select("-password -refreshToken")
+
+  return res
+    .status(200)
+    .json(
+      new apiResponse(200 , usersList , "Users list fetched successfully")
+    )
+
+})
+
 export {
   registerUser,
   loginUser,
   logoutUser,
+  getUsersList
 }
