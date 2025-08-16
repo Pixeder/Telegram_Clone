@@ -5,7 +5,7 @@ import App from './App.jsx'
 import store from './store/store.js'
 import { Provider } from 'react-redux'
 import { createBrowserRouter , RouterProvider } from 'react-router-dom'
-import { Login , SignUp } from './components/index.js'
+import { Login , SignUp , AuthLayout} from './components/index.js'
 
 const router = createBrowserRouter([
   {
@@ -14,11 +14,15 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/register',
-        element: <SignUp/>
+        element: <AuthLayout authentication={false}>
+          <SignUp/>
+        </AuthLayout>
       },
       {
         path: '/login',
-        element: <Login/>
+        element: <AuthLayout authentication={false}>
+          <Login/>
+        </AuthLayout>
       }
     ]
   }
