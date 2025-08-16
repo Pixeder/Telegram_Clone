@@ -13,6 +13,12 @@ const router = createBrowserRouter([
     element: <App/>,
     children: [
       {
+        path: '/',
+        element: <AuthLayout>
+          <App/>
+        </AuthLayout>
+      },
+      {
         path: '/register',
         element: <AuthLayout authentication={false}>
           <SignUp/>
