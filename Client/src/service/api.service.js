@@ -15,11 +15,11 @@ const registerUser = async (data) => {
   return await apiClient.post("users/register", data)
 }
 
-const login = async (data) => {
+const loginUser = async (data) => {
   return await apiClient.post("users/login", data)
 }
 
-const logout = async () => {
+const logoutUser = async () => {
   return await apiClient.post("users/logout")
 }
 
@@ -29,7 +29,7 @@ const getMessages = async (recipientId) => {
 
 export { 
   registerUser, 
-  login, 
-  logout, 
+  loginUser, 
+  logoutUser, 
   getMessages ,
 }
