@@ -4,7 +4,7 @@ const apiClient = axios.create(
   {
     baseURL: "http://localhost:8000/api/v1",
     withCredentials: true,
-    timeout: 1000,
+    timeout: 5000,
     headers: {
     "Content-Type": "application/json",
     }
@@ -27,9 +27,14 @@ const getMessages = async (recipientId) => {
   return await apiClient.get("/messages/${recipientId}")
 }
 
+const getUserList = async () =>{
+  return await apiClient.get("/users/getlist")
+}
+
 export { 
   registerUser, 
   loginUser, 
   logoutUser, 
-  getMessages ,
+  getMessages,
+  getUserList,
 }
