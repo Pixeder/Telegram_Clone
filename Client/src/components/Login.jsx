@@ -27,6 +27,15 @@ function Login() {
     }
   };
 
+  const showPassword = () => {
+    const toggle = document.getElementById('toggle')
+    if(toggle.type === "password"){
+      toggle.type = "text"
+    } else {
+      toggle.type = "password"
+    }
+  }
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
@@ -54,11 +63,24 @@ function Login() {
             <Input
               label="Password"
               type="password"
+              id="toggle"
               placeholder="Enter your password"
               {...register('password', {
                 required: "Password is required",
               })}
             />
+            <div className='flex items-center'>
+              <div className='w-4 mr-1.5'>
+                <Input 
+                  className="flex"
+                  type="checkbox"
+                  onClick = {showPassword}
+                />
+              </div>
+              <p>
+                Show Password
+              </p>
+            </div>
             {errors.password && <p className="text-red-600 mt-1 text-sm">{errors.password.message}</p>}
           </div>
           <Button type="submit">

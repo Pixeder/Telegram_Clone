@@ -29,7 +29,6 @@ function ChatWindow() {
         return;}
         try {
           const response = await getMessages(selectedUser._id);
-          console.log(response.data.data)
           setMessages(response.data.data);
         } catch (error) {
           console.error("Failed to fetch messages:", error.message);
@@ -72,7 +71,7 @@ function ChatWindow() {
       _id: Date.now(),
       senderId: loggedInUser._id,
       recipientId: selectedUser._id,
-      content: data.message,
+      message: data.message,
       createdAt: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, optimisticMessage]);
@@ -119,7 +118,7 @@ function ChatWindow() {
             className="flex-1"
             {...register('message', { required: true })}
           />
-          <Button type="submit" >Send</Button>
+          <div className=''><Button type="submit" >Send</Button></div>
         </form>
       </div>
     </div>
