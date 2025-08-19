@@ -4,7 +4,7 @@ import { apiResponse } from "../utils/ApiResponse.js";
 import { Message } from "../models/message.model.js";
 
 const getMessages = asyncHandler( async (req , res) => {
-    const {recipientId} = req.params
+    const recipientId = req.params.recipientId
     const senderId = req.user?._id
 
     if(!recipientId){
@@ -13,8 +13,8 @@ const getMessages = asyncHandler( async (req , res) => {
 
     const converstion = await Message.find({
       $or: [
-        { senderId: senderId, recipientId: recipientId },
-        { senderId: recipientId, recipientId: senderId },
+        { senderId: senderId, recieverId: recipientId },
+        { senderId: recipientId, recieverId: senderId },
       ],
     }).sort({ createdAt: "asc" });
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button, Input } from './ui';
-import { useDispatch } from 'react-redux';
+import { useDispatch , useSelector} from 'react-redux';
 import { login } from '../store/authSlice';
 import { loginUser } from '../service/api.service'; 
 import { useNavigate, Link } from 'react-router-dom';
@@ -17,11 +17,9 @@ function Login() {
     try {
       const response = await loginUser(userData);
       const { user, accessToken } = response.data.data;
-
-      dispatch(login({ user, accessToken }));
-
+      const token = accessToken;
+      dispatch(login({ user, token }));
       navigate('/');
-
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Login failed. Please check your credentials.";
       console.error("Login error:", error.response);

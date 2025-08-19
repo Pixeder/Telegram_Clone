@@ -11,7 +11,7 @@ const httpServer = http.createServer(app);
 
 const io = new Server(httpServer, {
     cors: {
-        origin: process.env.CORS_ORIGIN,
+        origin: `${process.env.ORIGIN}`,
         credentials: true
     }
 });
@@ -33,17 +33,16 @@ io.use((socket, next) => {
 });
 
 io.on("connection", (socket) => {
-    const userId = socket.user._id;
+    const userId = socket.user.id;
     onlineUsers.set(userId, socket.id);
 
     socket.on("private_message", async (data) => {
         const { recipientId, message } = data;
-
         try {
             const newMessage = await Message.create({
                 senderId: userId,
-                recipientId: recipientId,
-                content: message,
+                recieverId: recipientId,
+                message: message,
             });
 
             const recipientSocketId = onlineUsers.get(recipientId);
@@ -51,7 +50,7 @@ io.on("connection", (socket) => {
                 io.to(recipientSocketId).emit("receive_message", newMessage);
             }
         } catch (error) {
-            throw new apiError(500, error.message);
+            console.log(error.message)
         }
     });
 

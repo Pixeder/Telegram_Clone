@@ -24,7 +24,7 @@ const logoutUser = async () => {
 }
 
 const getMessages = async (recipientId) => {
-  return await apiClient.get("/messages/${recipientId}")
+  return await apiClient.get(`/messages/${recipientId}`)
 }
 
 const getUserList = async () =>{

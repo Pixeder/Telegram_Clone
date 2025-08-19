@@ -11,7 +11,6 @@ function UserSideBar() {
     const fetchUsers = async () => {
       try {
         const response = await getUserList();
-        console.log(response.data.data);
         dispatch(setUsers(response.data.data));
       } catch (error) {
         console.error("Failed to fetch user list:", error.message);
