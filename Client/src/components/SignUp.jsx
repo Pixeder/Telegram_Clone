@@ -7,6 +7,8 @@ import { useNavigate, Link } from 'react-router-dom';
 function SignUp() {
   const navigate = useNavigate();
   const [apiError, setApiError] = useState("");
+  // 1. State to manage password visibility
+  const [passwordShown, setPasswordShown] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm();
 
   const onSubmit = async (data) => {
@@ -21,6 +23,11 @@ function SignUp() {
       console.error("Registration error:", error.response);
       setApiError(errorMessage);
     }
+  };
+
+  // 2. Function to toggle the password visibility state
+  const togglePasswordVisibility = () => {
+    setPasswordShown(!passwordShown);
   };
 
   return (
@@ -50,7 +57,7 @@ function SignUp() {
               {...register('email', {
                 required: "Email is required",
                 pattern: {
-                  value: /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, // Corrected typo: 'alue' -> 'value'
+                  value: /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
                   message: "Please enter a valid email address"
                 }
               })}
@@ -60,7 +67,8 @@ function SignUp() {
           <div>
             <Input
               label="Password"
-              type="password"
+              // 3. The input type is now controlled by our state
+              type={passwordShown ? "text" : "password"}
               placeholder="Enter your password"
               {...register('password', {
                 required: "Password is required",
@@ -72,6 +80,24 @@ function SignUp() {
             />
             {errors.password && <p className="text-red-600 mt-1 text-sm">{errors.password.message}</p>}
           </div>
+
+          {/* 4. Styled "Show Password" Checkbox */}
+          <div className="flex items-center space-x-2">
+            <input
+              id="show-password-checkbox"
+              type="checkbox"
+              checked={passwordShown}
+              onChange={togglePasswordVisibility}
+              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label
+              htmlFor="show-password-checkbox"
+              className="text-sm font-medium text-gray-700 cursor-pointer"
+            >
+              Show Password
+            </label>
+          </div>
+
           <Button type="submit">
             Create Account
           </Button>

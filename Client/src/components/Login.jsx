@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button, Input } from './ui';
-import { useDispatch , useSelector} from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { login } from '../store/authSlice';
-import { loginUser } from '../service/api.service'; 
+import { loginUser } from '../service/api.service';
 import { useNavigate, Link } from 'react-router-dom';
 
 function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [apiError, setApiError] = useState("");
+  // 1. State to manage password visibility
+  const [passwordShown, setPasswordShown] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm();
 
   const onSubmit = async (userData) => {
@@ -17,8 +19,9 @@ function Login() {
     try {
       const response = await loginUser(userData);
       const { user, accessToken } = response.data.data;
-      const token = accessToken;
-      dispatch(login({ user, token }));
+      
+      // The token from the response body is used for the Redux store
+      dispatch(login({ user, accessToken }));
       navigate('/');
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Login failed. Please check your credentials.";
@@ -27,14 +30,10 @@ function Login() {
     }
   };
 
-  const showPassword = () => {
-    const toggle = document.getElementById('toggle')
-    if(toggle.type === "password"){
-      toggle.type = "text"
-    } else {
-      toggle.type = "password"
-    }
-  }
+  // 2. Function to toggle the password visibility state
+  const togglePasswordVisibility = () => {
+    setPasswordShown(!passwordShown);
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -52,7 +51,7 @@ function Login() {
               {...register('email', {
                 required: "Email is required",
                 pattern: {
-                  value: /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, // Corrected typo: 'alue' -> 'value'
+                  value: /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
                   message: "Please enter a valid email address"
                 }
               })}
@@ -62,27 +61,33 @@ function Login() {
           <div>
             <Input
               label="Password"
-              type="password"
-              id="toggle"
+              // 3. The input type is now controlled by our state
+              type={passwordShown ? "text" : "password"}
               placeholder="Enter your password"
               {...register('password', {
                 required: "Password is required",
               })}
             />
-            <div className='flex items-center'>
-              <div className='w-4 mr-1.5'>
-                <Input 
-                  className="flex"
-                  type="checkbox"
-                  onClick = {showPassword}
-                />
-              </div>
-              <p>
-                Show Password
-              </p>
-            </div>
             {errors.password && <p className="text-red-600 mt-1 text-sm">{errors.password.message}</p>}
           </div>
+
+          {/* 4. Styled "Show Password" Checkbox */}
+          <div className="flex items-center space-x-2">
+            <input
+              id="show-password-checkbox"
+              type="checkbox"
+              checked={passwordShown}
+              onChange={togglePasswordVisibility}
+              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label
+              htmlFor="show-password-checkbox"
+              className="text-sm font-medium text-gray-700 cursor-pointer"
+            >
+              Show Password
+            </label>
+          </div>
+
           <Button type="submit">
             Login
           </Button>

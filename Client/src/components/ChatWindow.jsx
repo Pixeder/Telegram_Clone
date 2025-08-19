@@ -4,6 +4,7 @@ import { getMessages } from '../service/api.service';
 import { Input, Button } from './ui';
 import { useForm } from 'react-hook-form';
 import connectSocket from '../service/socket.service'; 
+import EmojiPicker,{Theme} from 'emoji-picker-react';
 
 function ChatWindow() {
 
@@ -118,6 +119,10 @@ function ChatWindow() {
             className="flex-1"
             {...register('message', { required: true })}
           />
+          <div
+            className='absolute bottom-1.5 right-10'>
+               <EmojiPicker open="off"  height={400} className='' />
+          </div>
           <div className=''><Button type="submit" >Send</Button></div>
         </form>
       </div>
