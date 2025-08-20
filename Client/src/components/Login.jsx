@@ -19,9 +19,9 @@ function Login() {
     try {
       const response = await loginUser(userData);
       const { user, accessToken } = response.data.data;
-      
+      const token = accessToken
       // The token from the response body is used for the Redux store
-      dispatch(login({ user, accessToken }));
+      dispatch(login({ user, token }));
       navigate('/');
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Login failed. Please check your credentials.";

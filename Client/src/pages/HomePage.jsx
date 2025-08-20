@@ -2,7 +2,6 @@ import React from 'react';
 import { UserSideBar, ChatWindow } from '../components/index';
 
 function HomePage() {
-  // The selectedUser state is now managed by Redux, so we no longer need useState here.
 
   return (
     // The main container for the chat interface.
