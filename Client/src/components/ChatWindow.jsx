@@ -1,12 +1,14 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector , useDispatch } from 'react-redux';
 import { getMessages } from '../service/api.service';
 import { Input, Button } from './ui';
 import { useForm } from 'react-hook-form';
 import connectSocket from '../service/socket.service';
 import EmojiPicker from 'emoji-picker-react';
+import { setOnlineUsers } from '../store/chatSlice';
 
 function ChatWindow() {
+  const dispatch = useDispatch();
   const { currentUser: selectedUser } = useSelector((state) => state.chat);
   const { user: loggedInUser, token } = useSelector((state) => state.auth);
   const [messages, setMessages] = useState([]);
@@ -51,13 +53,17 @@ function ChatWindow() {
 
     const newSocket = connectSocket(token);
     setSocket(newSocket);
-
+    
     newSocket.on('receive_message', (newMessage) => {
       const currentChatPartner = selectedUserRef.current;
       if (newMessage.senderId === currentChatPartner?._id) {
         setMessages((prev) => [...prev, newMessage]);
       }
     });
+    
+    newSocket.on('update_online_users', (onlineUsers) => {
+      dispatch(setOnlineUsers(onlineUsers));
+    })
 
     return () => newSocket.disconnect();
   }, [token]); // Only depends on the token

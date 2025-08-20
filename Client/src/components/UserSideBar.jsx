@@ -5,7 +5,7 @@ import { setUsers, setCurrentUser } from '../store/chatSlice';
 
 function UserSideBar() {
   const dispatch = useDispatch();
-  const { users, currentUser } = useSelector((state) => state.chat);
+  const { users, currentUser, onlineUsers } = useSelector((state) => state.chat);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -30,21 +30,34 @@ function UserSideBar() {
         <h2 className="text-xl font-bold">Chats</h2>
       </div>
       <div className="flex flex-col">
-        {users.map((user) => (
-          <div
-            key={user._id}
-            onClick={() => handleSelectUser(user)}
-            className={`flex items-center p-3 cursor-pointer transition-colors duration-200
-                        ${currentUser?._id === user._id ? 'bg-blue-500 text-white' : 'hover:bg-gray-200'}`}
-          >
-            <img
-              src={user.avatarURL}
-              alt={user.username}
-              className="w-10 h-10 rounded-full mr-3 object-cover"
-            />
-            <span className="font-medium">{user.username}</span>
-          </div>
-        ))}
+        {users.map((user) => {
+          // Check if the current user is in the onlineUsers list
+          const isOnline = onlineUsers.includes(user._id);
+
+          return (
+            <div
+              key={user._id}
+              onClick={() => handleSelectUser(user)}
+              className={`flex items-center p-3 cursor-pointer transition-colors duration-200
+                          ${currentUser?._id === user._id ? 'bg-blue-500 text-white' : 'hover:bg-gray-200'}`}
+            >
+              {/* --- STYLING FOR THE DOT --- */}
+              {/* 1. Wrap the avatar in a relative container */}
+              <div className="relative mr-3">
+                <img
+                  src={user.avatarURL}
+                  alt={user.username}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+                {/* 2. Conditionally render and style the dot */}
+                {isOnline && (
+                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                )}
+              </div>
+              <span className="font-medium">{user.username}</span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

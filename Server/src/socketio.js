@@ -36,6 +36,8 @@ io.on("connection", (socket) => {
     const userId = socket.user.id;
     onlineUsers.set(userId, socket.id);
 
+    io.emit("update_online_users", Array.from(onlineUsers.keys()));
+    
     socket.on("private_message", async (data) => {
         const { recipientId, message } = data;
         try {
@@ -55,6 +57,7 @@ io.on("connection", (socket) => {
     });
 
     socket.on("disconnect", () => {
+        io.emit("update_online_users", Array.from(onlineUsers.keys()));
         onlineUsers.delete(userId);
         console.log("❌ User disconnected:", socket.id);
         console.log("Online users:", Array.from(onlineUsers.keys()));

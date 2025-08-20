@@ -1,8 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { set } from "mongoose";
 
 const initialState={
   users: [],
   currentUser: null,
+  onlineUsers: [],
 }
 
 const chatSlice = createSlice({
@@ -15,8 +17,11 @@ const chatSlice = createSlice({
     setCurrentUser: (state, action) => {
       state.currentUser = action.payload;
     },
+    setOnlineUsers: (state, action) => {
+      state.onlineUsers = action.payload;
+    },
   },
 });
 
-export const { setUsers, setCurrentUser } = chatSlice.actions
+export const { setUsers, setCurrentUser, setOnlineUsers} = chatSlice.actions
 export default chatSlice.reducer;
