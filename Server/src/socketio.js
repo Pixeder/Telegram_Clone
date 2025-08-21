@@ -37,6 +37,18 @@ io.on("connection", (socket) => {
     onlineUsers.set(userId, socket.id);
 
     io.emit("update_online_users", Array.from(onlineUsers.keys()));
+
+    socket.on('start_typing',(data) => {
+        const { recipientId } = data;
+        const recipientSocketId = onlineUsers.get(recipientId);
+        io.to(recipientSocketId).emit('typing_started', { senderId: socket.user.id });
+    })
+
+    socket.on('stop_typing',(data) => {
+        const { recipientId } = data;
+        const recipientSocketId = onlineUsers.get(recipientId);
+        io.to(recipientSocketId).emit('typing_stopped', { senderId: socket.user.id });
+    })
     
     socket.on("private_message", async (data) => {
         const { recipientId, message } = data;
@@ -57,8 +69,8 @@ io.on("connection", (socket) => {
     });
 
     socket.on("disconnect", () => {
-        io.emit("update_online_users", Array.from(onlineUsers.keys()));
         onlineUsers.delete(userId);
+        io.emit("update_online_users", Array.from(onlineUsers.keys()));
         console.log("❌ User disconnected:", socket.id);
         console.log("Online users:", Array.from(onlineUsers.keys()));
     });

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useSelector , useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { getMessages } from '../service/api.service';
 import { Input, Button } from './ui';
 import { useForm } from 'react-hook-form';
@@ -11,14 +11,23 @@ function ChatWindow() {
   const dispatch = useDispatch();
   const { currentUser: selectedUser } = useSelector((state) => state.chat);
   const { user: loggedInUser, token } = useSelector((state) => state.auth);
+
   const [messages, setMessages] = useState([]);
   const [socket, setSocket] = useState(null);
   const [showPicker, setShowPicker] = useState(false);
-  const { register, handleSubmit, reset, setValue, getValues } = useForm();
+  // 1. State to track if the OTHER user is typing
+  const [isTyping, setIsTyping] = useState(false);
+  
+  const { register, handleSubmit, reset, setValue, getValues, watch } = useForm();
   
   const messagesEndRef = useRef(null);
-  // 1. Ref to prevent stale data in socket listener
   const selectedUserRef = useRef(selectedUser);
+  // Ref to hold the timeout for the typing indicator
+  const typingTimeoutRef = useRef(null);
+
+  // Watch for changes in the message input field
+  const messageValue = watch('message');
+
   useEffect(() => {
     selectedUserRef.current = selectedUser;
   }, [selectedUser]);
@@ -32,7 +41,7 @@ function ChatWindow() {
   useEffect(() => {
     const fetchMessages = async () => {
       if (!selectedUser) {
-        setMessages([]); // Clear messages when no user is selected
+        setMessages([]);
         return;
       }
       try {
@@ -45,50 +54,78 @@ function ChatWindow() {
     fetchMessages();
   }, [selectedUser]);
 
-  // 2. Corrected useEffect for stable socket connection
   useEffect(() => {
-    if (!token) {
-      return;
-    }
+    if (!token) return;
 
     const newSocket = connectSocket(token);
     setSocket(newSocket);
-    
+
+    // --- Listeners for real-time events ---
     newSocket.on('receive_message', (newMessage) => {
       const currentChatPartner = selectedUserRef.current;
       if (newMessage.senderId === currentChatPartner?._id) {
         setMessages((prev) => [...prev, newMessage]);
       }
     });
-    
+
     newSocket.on('update_online_users', (onlineUsers) => {
       dispatch(setOnlineUsers(onlineUsers));
-    })
+    });
+
+    newSocket.on('typing_started', ({ senderId }) => {
+      const currentChatPartner = selectedUserRef.current;
+      if (senderId === currentChatPartner?._id) {
+        setIsTyping(true);
+      }
+    });
+
+    newSocket.on('typing_stopped', ({ senderId }) => {
+      const currentChatPartner = selectedUserRef.current;
+      if (senderId === currentChatPartner?._id) {
+        setIsTyping(false);
+      }
+    });
 
     return () => newSocket.disconnect();
-  }, [token]); // Only depends on the token
+  }, [token, dispatch]);
+
+  // --- 2. Effect for sending typing events (Debounce Logic) ---
+  useEffect(() => {
+    if (!socket || !selectedUser) return;
+
+    // Clear the previous timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    // If there's text in the input, emit 'start_typing'
+    if (messageValue) {
+      socket.emit('start_typing', { recipientId: selectedUser._id });
+    }
+
+    // Set a new timeout. If the user doesn't type for 2 seconds, emit 'stop_typing'.
+    typingTimeoutRef.current = setTimeout(() => {
+      socket.emit('stop_typing', { recipientId: selectedUser._id });
+    }, 2000);
+
+  }, [messageValue, socket, selectedUser]); // This effect runs whenever the input value changes
 
   const onSendMessage = (data) => {
     if (!socket || !data.message?.trim() || !selectedUser) return;
 
-    const messagePayload = {
-      recipientId: selectedUser._id,
-      message: data.message,
-    };
-    
+    const messagePayload = { recipientId: selectedUser._id, message: data.message };
     socket.emit('private_message', messagePayload);
     
-    // 3. Corrected optimistic update object
     const optimisticMessage = {
       _id: Date.now(),
       senderId: loggedInUser._id,
       recipientId: selectedUser._id,
-      message: data.message,
+      message: data.message, // <-- CRITICAL FIX: Must be 'content'
       createdAt: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, optimisticMessage]);
     reset();
-    setShowPicker(false); // Hide picker after sending
+    setShowPicker(false);
   };
 
   const handleEmojiClick = (emojiObject) => {
@@ -110,7 +147,10 @@ function ChatWindow() {
       {/* Chat Header */}
       <div className="flex items-center p-3 border-b border-gray-200">
         <img src={selectedUser.avatarURL} alt="Avatar" className="w-10 h-10 rounded-full mr-3 object-cover" />
-        <p className="text-lg font-bold">{selectedUser.username}</p>
+        <div className='flex flex-col'>
+          <p className="text-lg font-bold">{selectedUser.username}</p>
+          {isTyping && <p className="text-sm text-blue-500">is typing...</p>}
+        </div>
       </div>
 
       {/* Message List */}
