@@ -4,6 +4,7 @@ import { getMessages } from '../controllers/message.controller.js'
 
 const messageRouter = Router()
 
-messageRouter.route('/:recipientId').get(verifyJWT , getMessages)
+messageRouter.route('/:recipientId')
+  .get(verifyJWT , getMessages)
 
 export default messageRouter

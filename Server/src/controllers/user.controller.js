@@ -57,7 +57,7 @@ const registerUser = asyncHandler( async (req , res) => {
 
   const createdUser = user.toObject()
   delete createdUser.password
-    delete createdUser.refreshToken
+  delete createdUser.refreshToken
 
   if (!createdUser) {
         throw new ApiError(500, "Something went wrong while registering the user");

@@ -23,4 +23,8 @@ import messageRouter from './routes/message.route.js'
 
 app.use('/api/v1/messages', messageRouter)
 
+import groupRouter from './routes/group.route.js'
+
+app.use('/api/v1/groups', groupRouter)
+
 export { app }
