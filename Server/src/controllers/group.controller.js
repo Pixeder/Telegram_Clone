@@ -11,13 +11,13 @@ const createGroup = asyncHandler(async (req, res) => {
 
     // More robust validation.
     if (!groupName?.trim() || !members || !Array.isArray(members) || members.length === 0) {
-        throw new ApiError(400, "Group name and at least one member are required.");
+        throw new apiError(400, "Group name and at least one member are required.");
     }
 
     // The creator is automatically an admin and a member.
     const initialAdmins = [createdBy];
     // Use a Set to prevent the creator from being added twice if they are also in the members list.
-    const allMembers = [...new Set([createdBy])];
+    const allMembers = [...new Set([...members , createdBy])];
 
     const group = await Group.create({
         groupName,

@@ -46,4 +46,5 @@ export {
   getMessages,
   getUserList,
   getGroups,
+  createGroup,
 }

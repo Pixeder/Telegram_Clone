@@ -5,6 +5,7 @@ import Footer from "./Footer";
 import AuthLayout from "./AuthLayout";
 import UserSideBar from "./UserSideBar";
 import ChatWindow from "./ChatWindow";
+import CreateGroupPopup from "./CreateGroupPopup";
 
 export {
   ChatWindow,
@@ -14,4 +15,5 @@ export {
   Footer,
   Login,
   SignUp,
+  CreateGroupPopup
 }
