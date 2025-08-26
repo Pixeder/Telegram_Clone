@@ -19,7 +19,7 @@ const groupSchema = new Schema({
     type: String,
     required: true,
   },
-  memebers:{
+  members:{
     type: [{
       type: Schema.Types.ObjectId,
       ref: "User",
@@ -29,7 +29,7 @@ const groupSchema = new Schema({
   },
   avatarURL: {
     type: String,
-    default : "https://via.placeholder.com/150/771796/FFFFFF?text=Group"
+    default : "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/800px-User-avatar.svg.png"
   }
 
 } ,{ timestamps : true})

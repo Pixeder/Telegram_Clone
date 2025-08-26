@@ -9,7 +9,7 @@ import { setOnlineUsers } from '../store/chatSlice';
 
 function ChatWindow() {
   const dispatch = useDispatch();
-  const { currentUser: selectedUser } = useSelector((state) => state.chat);
+  const { currentUserOrGroup : selectedUser } = useSelector((state) => state.chat);
   const { user: loggedInUser, token } = useSelector((state) => state.auth);
 
   const [messages, setMessages] = useState([]);
@@ -89,26 +89,22 @@ function ChatWindow() {
     return () => newSocket.disconnect();
   }, [token, dispatch]);
 
-  // --- 2. Effect for sending typing events (Debounce Logic) ---
   useEffect(() => {
     if (!socket || !selectedUser) return;
 
-    // Clear the previous timeout
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
 
-    // If there's text in the input, emit 'start_typing'
     if (messageValue) {
       socket.emit('start_typing', { recipientId: selectedUser._id });
     }
 
-    // Set a new timeout. If the user doesn't type for 2 seconds, emit 'stop_typing'.
     typingTimeoutRef.current = setTimeout(() => {
       socket.emit('stop_typing', { recipientId: selectedUser._id });
     }, 2000);
 
-  }, [messageValue, socket, selectedUser]); // This effect runs whenever the input value changes
+  }, [messageValue, socket, selectedUser]);
 
   const onSendMessage = (data) => {
     if (!socket || !data.message?.trim() || !selectedUser) return;
@@ -120,7 +116,7 @@ function ChatWindow() {
       _id: Date.now(),
       senderId: loggedInUser._id,
       recipientId: selectedUser._id,
-      message: data.message, // <-- CRITICAL FIX: Must be 'content'
+      message: data.message,
       createdAt: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, optimisticMessage]);

@@ -12,15 +12,15 @@ const apiClient = axios.create(
 )
 
 const registerUser = async (data) => {
-  return await apiClient.post("users/register", data)
+  return await apiClient.post("/users/register", data)
 }
 
 const loginUser = async (data) => {
-  return await apiClient.post("users/login", data)
+  return await apiClient.post("/users/login", data)
 }
 
 const logoutUser = async () => {
-  return await apiClient.post("users/logout")
+  return await apiClient.post("/users/logout")
 }
 
 const getMessages = async (recipientId) => {
@@ -31,10 +31,19 @@ const getUserList = async () =>{
   return await apiClient.get("/users/getlist")
 }
 
+const createGroup = async (data) =>{
+  return await apiClient.post("/groups/",data)
+}
+
+const getGroups = async () =>{
+  return await apiClient.get("/groups/")
+}
+
 export { 
   registerUser, 
   loginUser, 
   logoutUser, 
   getMessages,
   getUserList,
+  getGroups,
 }

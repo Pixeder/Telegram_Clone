@@ -6,30 +6,26 @@ import {
   addMember , 
   removeAdmin , 
   removeMember , 
-  getGroups } from '../controllers/group.controller'
-import verifyJWT from '../middlewares/verifyJWT'
+  getGroups } from '../controllers/group.controller.js'
+import { verifyJWT } from '../middleware/auth.middlware.js'
 
 const groupRouter = Router()
 
-groupRouter.route('/create')
-    .post(verifyJWT , createGroup)
+groupRouter.use(verifyJWT)
 
-groupRouter.route('/delete')
-    .post(verifyJWT , deleteGroup)
+groupRouter.route('/')
+    .get(getGroups)
+    .post(createGroup)
 
-groupRouter.route('/add-admin')
-    .post(verifyJWT , addAdmin)
+groupRouter.route('/:groupId/members')
+    .patch(addMember)
+    .delete(removeMember)
 
-groupRouter.route('/add-member')
-    .post(verifyJWT , addMember)
+groupRouter.route('/:groupId/admins')
+    .patch(addAdmin)
+    .delete(removeAdmin)
 
-groupRouter.route('/remove-admin')
-    .post(verifyJWT , removeAdmin)
-
-groupRouter.route('/remove-member')
-    .post(verifyJWT , removeMember)
-
-groupRouter.route('/get-groups')
-    .get(verifyJWT , getGroups)
+groupRouter.route('/:groupId')
+    .delete(deleteGroup)
 
 export default groupRouter

@@ -1,11 +1,14 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getUserList } from '../service/api.service';
-import { setUsers, setCurrentUser } from '../store/chatSlice';
+import { getUserList , getGroups} from '../service/api.service';
+import { setUsers, setCurrentUserOrGroup , setGroups } from '../store/chatSlice';
+import { useState } from 'react';
 
 function UserSideBar() {
   const dispatch = useDispatch();
-  const { users, currentUser, onlineUsers } = useSelector((state) => state.chat);
+  const [ members , setMembers ] = useState([]);
+  const { users, groups , currentUserOrGroup, onlineUsers } = useSelector((state) => state.chat);
+  const rightClickMenu = [ 'select' , 'inspect' , 'show' ]
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -18,11 +21,24 @@ function UserSideBar() {
     };
 
     fetchUsers();
+
+    const fetchGroups = async () => {
+      try {
+        const fetchedGroups = await getGroups();
+        dispatch(setGroups(fetchedGroups.data.data))
+      } catch (error) {
+        console.log(error.message)
+      }
+    }
+
+    fetchGroups();
   }, [dispatch]);
 
-  const handleSelectUser = (user) => {
-    dispatch(setCurrentUser(user));
+  const handleSelectUserOrGroup = (user) => {
+    dispatch(setCurrentUserOrGroup(user));
   };
+
+  
 
   return (
     <div className="w-full md:w-1/3 lg:w-1/4 bg-gray-100 border-r border-gray-200 h-screen overflow-y-auto">
@@ -37,19 +53,17 @@ function UserSideBar() {
           return (
             <div
               key={user._id}
-              onClick={() => handleSelectUser(user)}
+              onClick={() => handleSelectUserOrGroup(user)}
               className={`flex items-center p-3 cursor-pointer transition-colors duration-200
-                          ${currentUser?._id === user._id ? 'bg-blue-500 text-white' : 'hover:bg-gray-200'}`}
-            >
-              {/* --- STYLING FOR THE DOT --- */}
-              {/* 1. Wrap the avatar in a relative container */}
+                          ${currentUserOrGroup?._id === user._id ? 'bg-blue-500 text-white' : 'hover:bg-gray-200'}
+                          ${members.includes(user._id) ?? 'bg-gray-200'}  `}>
+
               <div className="relative mr-3">
                 <img
                   src={user.avatarURL}
                   alt={user.username}
                   className="w-10 h-10 rounded-full object-cover"
                 />
-                {/* 2. Conditionally render and style the dot */}
                 {isOnline && (
                   <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
                 )}
@@ -58,6 +72,18 @@ function UserSideBar() {
             </div>
           );
         })}
+        {
+          groups.map((group) => (
+            <div
+              key={group._id}
+              onClick={() => handleSelectUserOrGroup(group)}>
+                <div>
+                  <img src={group.avatarURL} alt="Avatar of group" />
+                </div>
+                <span>{group.groupName}</span>
+            </div>
+          ))
+        }
       </div>
     </div>
   );
