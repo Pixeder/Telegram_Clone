@@ -64,7 +64,7 @@ function UserSideBar() {
                 }`}
               >
                 <img
-                  src={group.groupAvatarURL}
+                  src={group.avatarURL}
                   alt={group.groupName}
                   className="w-10 h-10 rounded-full object-cover mr-3"
                 />
