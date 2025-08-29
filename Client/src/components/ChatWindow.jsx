@@ -9,8 +9,9 @@ import { setOnlineUsers } from '../store/chatSlice';
 
 function ChatWindow() {
   const dispatch = useDispatch();
-  const { currentUserOrGroup : selectedUser } = useSelector((state) => state.chat);
+  const { currentUserOrGroup : selectedOnes } = useSelector((state) => state.chat);
   const { user: loggedInUser, token } = useSelector((state) => state.auth);
+  const isGroup = selectedOnes && 'members' in selectedOnes
 
   const [messages, setMessages] = useState([]);
   const [socket, setSocket] = useState(null);
@@ -21,7 +22,7 @@ function ChatWindow() {
   const { register, handleSubmit, reset, setValue, getValues, watch } = useForm();
   
   const messagesEndRef = useRef(null);
-  const selectedUserRef = useRef(selectedUser);
+  const selectedUserRef = useRef(selectedOnes);
   // Ref to hold the timeout for the typing indicator
   const typingTimeoutRef = useRef(null);
 
@@ -29,8 +30,8 @@ function ChatWindow() {
   const messageValue = watch('message');
 
   useEffect(() => {
-    selectedUserRef.current = selectedUser;
-  }, [selectedUser]);
+    selectedUserRef.current = selectedOnes;
+  }, [selectedOnes]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -40,19 +41,19 @@ function ChatWindow() {
 
   useEffect(() => {
     const fetchMessages = async () => {
-      if (!selectedUser) {
+      if (!selectedOnes) {
         setMessages([]);
         return;
       }
       try {
-        const response = await getMessages(selectedUser._id);
+        const response = await getMessages(selectedOnes._id);
         setMessages(response.data.data);
       } catch (error) {
         console.error("Failed to fetch messages:", error.message);
       }
     };
     fetchMessages();
-  }, [selectedUser]);
+  }, [selectedOnes]);
 
   useEffect(() => {
     if (!token) return;
@@ -90,32 +91,32 @@ function ChatWindow() {
   }, [token, dispatch]);
 
   useEffect(() => {
-    if (!socket || !selectedUser) return;
+    if (!socket || !selectedOnes) return;
 
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
 
     if (messageValue) {
-      socket.emit('start_typing', { recipientId: selectedUser._id });
+      socket.emit('start_typing', { recipientId: selectedOnes._id });
     }
 
     typingTimeoutRef.current = setTimeout(() => {
-      socket.emit('stop_typing', { recipientId: selectedUser._id });
+      socket.emit('stop_typing', { recipientId: selectedOnes._id });
     }, 2000);
 
-  }, [messageValue, socket, selectedUser]);
+  }, [messageValue, socket, selectedOnes]);
 
   const onSendMessage = (data) => {
-    if (!socket || !data.message?.trim() || !selectedUser) return;
+    if (!socket || !data.message?.trim() || !selectedOnes) return;
 
-    const messagePayload = { recipientId: selectedUser._id, message: data.message };
+    const messagePayload = { recipientId: selectedOnes._id, message: data.message };
     socket.emit('private_message', messagePayload);
     
     const optimisticMessage = {
       _id: Date.now(),
       senderId: loggedInUser._id,
-      recipientId: selectedUser._id,
+      recipientId: selectedOnes._id,
       message: data.message,
       createdAt: new Date().toISOString(),
     };
@@ -129,7 +130,7 @@ function ChatWindow() {
     setValue('message', currentMessage + emojiObject.emoji);
   };
 
-  if (!selectedUser) {
+  if (!selectedOnes) {
     return (
       <div className="flex flex-col items-center justify-center w-full h-screen text-gray-500">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-16 h-16 mb-4"><path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.794 9 8.25z" /></svg>
@@ -142,10 +143,10 @@ function ChatWindow() {
     <div className="flex flex-col w-full h-screen bg-white">
       {/* Chat Header */}
       <div className="flex items-center p-3 border-b border-gray-200">
-        <img src={selectedUser.avatarURL} alt="Avatar" className="w-10 h-10 rounded-full mr-3 object-cover" />
+        <img src={selectedOnes.avatarURL} alt="Avatar" className="w-10 h-10 rounded-full mr-3 object-cover" />
         <div className='flex flex-col'>
-          <p className="text-lg font-bold">{selectedUser.username}</p>
-          {isTyping && <p className="text-sm text-blue-500">is typing...</p>}
+          <p className="text-lg font-bold">{isGroup ? selectedOnes.groupName : selectedOnes.username}</p>
+          {!isGroup && isTyping && <p className="text-sm text-blue-500">is typing...</p>}
         </div>
       </div>
 

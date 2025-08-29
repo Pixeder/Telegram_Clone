@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUserList, getGroups } from '../service/api.service';
 import { setUsers, setCurrentUserOrGroup, setGroups } from '../store/chatSlice';
-import { Link } from 'react-router-dom';
 
 // SVG Icon for creating a group
 const CreateGroupIcon = () => (
@@ -19,9 +18,10 @@ const CreateGroupIcon = () => (
   </svg>
 );
 
-function UserSideBar() {
+function UserSideBar({
+  onOpenCreateGroup
+}) {
   const dispatch = useDispatch();
-  // 1. Removed unused 'members' and 'rightClickMenu' state/variables
   const { users, groups, currentUserOrGroup, onlineUsers } = useSelector((state) => state.chat);
 
   useEffect(() => {
@@ -38,7 +38,7 @@ function UserSideBar() {
       }
     };
     fetchAll();
-  }, [dispatch]);
+  }, [dispatch , groups]);
 
   const handleSelect = (item) => {
     dispatch(setCurrentUserOrGroup(item));
@@ -105,13 +105,13 @@ function UserSideBar() {
       </div>
 
       {/* Create Group Floating Action Button */}
-      <Link
-        to="/createGroup"
-        className="absolute bottom-5 right-5 w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-blue-700 transition-colors"
+      <button
+        onClick={onOpenCreateGroup} // This now calls the function from HomePage
+        className="absolute bottom-5 right-5 ..."
         title="Create new group"
       >
         <CreateGroupIcon />
-      </Link>
+      </button>
     </div>
   );
 }

@@ -1,17 +1,16 @@
-import React from 'react';
-import { UserSideBar, ChatWindow } from '../components/index';
+import React, { useState } from 'react';
+import { UserSideBar, ChatWindow , CreateGroupPopup } from '../components/index';
 
 function HomePage() {
 
+  const [ isPopOn , setIsPopOn ] = useState(false);
+
   return (
-    // The main container for the chat interface.
-    // - `flex`: Arranges the sidebar and chat window side-by-side.
-    // - `h-screen`: Makes the container take up the full height of the viewport.
-    // - `overflow-hidden`: Prevents any accidental scrolling on the main container itself.
-    <div className="flex h-screen overflow-hidden bg-gray-100">
-      <UserSideBar />
-      <ChatWindow />
-    </div>
+      <div className="flex h-screen overflow-hidden bg-gray-100">
+        <UserSideBar onOpenCreateGroup={() => setIsPopOn(true) } />
+        <ChatWindow />
+        {isPopOn && <CreateGroupPopup onClose={() => setIsPopOn(false) } />}
+        </div>
   );
 }
 

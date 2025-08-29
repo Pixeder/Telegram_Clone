@@ -9,12 +9,14 @@ const messageSchema = new Schema({
     recieverId: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
     },
     message: {
       type: String,
       required: true,
     },
+    groupId: {
+      type: String,
+    }
   },
   { timestamps: true,}
 )
