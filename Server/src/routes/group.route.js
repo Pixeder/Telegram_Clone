@@ -6,6 +6,7 @@ import {
   addMember , 
   removeAdmin , 
   removeMember , 
+  getGroupMessages ,
   getGroups } from '../controllers/group.controller.js'
 import { verifyJWT } from '../middleware/auth.middlware.js'
 
@@ -27,5 +28,8 @@ groupRouter.route('/:groupId/admins')
 
 groupRouter.route('/:groupId')
     .delete(deleteGroup)
+
+groupRouter.route('/:groupId/messages')
+    .get(getGroupMessages)
 
 export default groupRouter

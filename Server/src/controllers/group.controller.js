@@ -185,7 +185,7 @@ const removeAdmin = asyncHandler(async (req, res) => {
     return res.status(200).json(new apiResponse(200, updatedGroup, "Admin removed successfully"));
 });
 
-// --- Get Group in which user is a Member ---
+// --- GET GROUP ---
 const getGroups = asyncHandler(async (req , res) => {
   const userId = req.user._id;
 
@@ -207,6 +207,30 @@ const getGroups = asyncHandler(async (req , res) => {
 
 }) 
 
+// --- GET GROUP MESSAGE ---
+const getGroupMessages = asyncHandler( async (req , res) => {
+    const { groupId } = req.params;
+
+    if(!groupId){
+        throw new apiError(401, "Invalid group Id or not found")
+    }
+
+    const groupMessages = await Group.find({
+        $or: [{ groupId : groupId }]
+    }).sort({createdAt: 'asc'})
+
+    return res
+        .status(200)
+        .json(
+            new apiResponse(
+                200,
+                groupMessages,
+                "messages fetched successfully"
+            )
+        )
+
+})
+
 export {
     createGroup,
     deleteGroup,
@@ -215,4 +239,5 @@ export {
     addAdmin,
     removeAdmin,
     getGroups,
+    getGroupMessages
 };

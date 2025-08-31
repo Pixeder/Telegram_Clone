@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { getMessages } from '../service/api.service';
+import { getMessages, getGroupMessages } from '../service/api.service'; // 1. Import getGroupMessages
 import { Input, Button } from './ui';
 import { useForm } from 'react-hook-form';
 import connectSocket from '../service/socket.service';
@@ -9,29 +9,28 @@ import { setOnlineUsers } from '../store/chatSlice';
 
 function ChatWindow() {
   const dispatch = useDispatch();
-  const { currentUserOrGroup : selectedOnes } = useSelector((state) => state.chat);
+  // Renamed for clarity
+  const { currentUserOrGroup: selectedChat } = useSelector((state) => state.chat);
   const { user: loggedInUser, token } = useSelector((state) => state.auth);
-  const isGroup = selectedOnes && 'members' in selectedOnes
+
+  // 2. Check to see if the selected chat is a group
+  const isGroupChat = selectedChat && 'members' in selectedChat;
 
   const [messages, setMessages] = useState([]);
   const [socket, setSocket] = useState(null);
   const [showPicker, setShowPicker] = useState(false);
-  // 1. State to track if the OTHER user is typing
   const [isTyping, setIsTyping] = useState(false);
   
   const { register, handleSubmit, reset, setValue, getValues, watch } = useForm();
   
   const messagesEndRef = useRef(null);
-  const selectedUserRef = useRef(selectedOnes);
-  // Ref to hold the timeout for the typing indicator
+  const selectedChatRef = useRef(selectedChat);
   const typingTimeoutRef = useRef(null);
-
-  // Watch for changes in the message input field
   const messageValue = watch('message');
 
   useEffect(() => {
-    selectedUserRef.current = selectedOnes;
-  }, [selectedOnes]);
+    selectedChatRef.current = selectedChat;
+  }, [selectedChat]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -39,22 +38,29 @@ function ChatWindow() {
 
   useEffect(scrollToBottom, [messages]);
 
+  // 3. Effect to fetch history for either a user or a group
   useEffect(() => {
     const fetchMessages = async () => {
-      if (!selectedOnes) {
+      if (!selectedChat) {
         setMessages([]);
         return;
       }
       try {
-        const response = await getMessages(selectedOnes._id);
+        let response;
+        if (isGroupChat) {
+          response = await getGroupMessages(selectedChat._id);
+        } else {
+          response = await getMessages(selectedChat._id);
+        }
         setMessages(response.data.data);
       } catch (error) {
         console.error("Failed to fetch messages:", error.message);
       }
     };
     fetchMessages();
-  }, [selectedOnes]);
+  }, [selectedChat, isGroupChat]);
 
+  // Effect for managing the socket connection and listeners
   useEffect(() => {
     if (!token) return;
 
@@ -63,8 +69,16 @@ function ChatWindow() {
 
     // --- Listeners for real-time events ---
     newSocket.on('receive_message', (newMessage) => {
-      const currentChatPartner = selectedUserRef.current;
-      if (newMessage.senderId === currentChatPartner?._id) {
+      const currentChatPartner = selectedChatRef.current;
+      if (!isGroupChat && newMessage.senderId === currentChatPartner?._id) {
+        setMessages((prev) => [...prev, newMessage]);
+      }
+    });
+
+    // 4. Listener for incoming group messages
+    newSocket.on('receive_group_message', (newMessage) => {
+      const currentChat = selectedChatRef.current;
+      if (isGroupChat && newMessage.groupId === currentChat?._id) {
         setMessages((prev) => [...prev, newMessage]);
       }
     });
@@ -74,51 +88,61 @@ function ChatWindow() {
     });
 
     newSocket.on('typing_started', ({ senderId }) => {
-      const currentChatPartner = selectedUserRef.current;
-      if (senderId === currentChatPartner?._id) {
+      const currentChatPartner = selectedChatRef.current;
+      if (!isGroupChat && senderId === currentChatPartner?._id) {
         setIsTyping(true);
       }
     });
 
     newSocket.on('typing_stopped', ({ senderId }) => {
-      const currentChatPartner = selectedUserRef.current;
-      if (senderId === currentChatPartner?._id) {
+      const currentChatPartner = selectedChatRef.current;
+      if (!isGroupChat && senderId === currentChatPartner?._id) {
         setIsTyping(false);
       }
     });
 
     return () => newSocket.disconnect();
-  }, [token, dispatch]);
+  }, [token, dispatch, isGroupChat]);
 
+  // Effect for sending typing events (only for private chats)
   useEffect(() => {
-    if (!socket || !selectedOnes) return;
+    if (!socket || !selectedChat || isGroupChat) return;
 
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-    }
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
     if (messageValue) {
-      socket.emit('start_typing', { recipientId: selectedOnes._id });
+      socket.emit('start_typing', { recipientId: selectedChat._id });
     }
 
     typingTimeoutRef.current = setTimeout(() => {
-      socket.emit('stop_typing', { recipientId: selectedOnes._id });
+      socket.emit('stop_typing', { recipientId: selectedChat._id });
     }, 2000);
 
-  }, [messageValue, socket, selectedOnes]);
+  }, [messageValue, socket, selectedChat, isGroupChat]);
 
+  // 5. Function to send either a private or group message
   const onSendMessage = (data) => {
-    if (!socket || !data.message?.trim() || !selectedOnes) return;
+    if (!socket || !data.message?.trim() || !selectedChat) return;
 
-    const messagePayload = { recipientId: selectedOnes._id, message: data.message };
-    socket.emit('private_message', messagePayload);
+    let payload;
+    let eventName;
+
+    if (isGroupChat) {
+      eventName = 'group_message';
+      payload = { groupId: selectedChat._id, message: data.message };
+    } else {
+      eventName = 'private_message';
+      payload = { recipientId: selectedChat._id, message: data.message };
+    }
+    
+    socket.emit(eventName, payload);
     
     const optimisticMessage = {
       _id: Date.now(),
       senderId: loggedInUser._id,
-      recipientId: selectedOnes._id,
       message: data.message,
       createdAt: new Date().toISOString(),
+      ...(isGroupChat ? { groupId: selectedChat._id } : { recipientId: selectedChat._id })
     };
     setMessages((prev) => [...prev, optimisticMessage]);
     reset();
@@ -130,23 +154,22 @@ function ChatWindow() {
     setValue('message', currentMessage + emojiObject.emoji);
   };
 
-  if (!selectedOnes) {
-    return (
-      <div className="flex flex-col items-center justify-center w-full h-screen text-gray-500">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-16 h-16 mb-4"><path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.794 9 8.25z" /></svg>
-        <p className="text-xl">Select a user to start chatting</p>
-      </div>
-    );
+  if (!selectedChat) {
+    return ( <div className="flex flex-col items-center justify-center w-full h-screen text-gray-500">...</div> );
   }
+
+  // 6. Dynamic header info
+  const chatName = isGroupChat ? selectedChat.groupName : selectedChat.username;
+  const chatAvatar = isGroupChat ? selectedChat.groupAvatarURL : selectedChat.avatarURL;
 
   return (
     <div className="flex flex-col w-full h-screen bg-white">
       {/* Chat Header */}
       <div className="flex items-center p-3 border-b border-gray-200">
-        <img src={selectedOnes.avatarURL} alt="Avatar" className="w-10 h-10 rounded-full mr-3 object-cover" />
+        <img src={chatAvatar} alt="Avatar" className="w-10 h-10 rounded-full mr-3 object-cover" />
         <div className='flex flex-col'>
-          <p className="text-lg font-bold">{isGroup ? selectedOnes.groupName : selectedOnes.username}</p>
-          {!isGroup && isTyping && <p className="text-sm text-blue-500">is typing...</p>}
+          <p className="text-lg font-bold">{chatName}</p>
+          {!isGroupChat && isTyping && <p className="text-sm text-blue-500">is typing...</p>}
         </div>
       </div>
 
@@ -157,7 +180,6 @@ function ChatWindow() {
           return (
             <div key={message._id} className={`flex mb-4 ${isSentByMe ? 'justify-end' : 'justify-start'}`}>
               <div className={`rounded-lg px-4 py-2 max-w-sm ${isSentByMe ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}>
-                {/* 4. Corrected property to render */}
                 {message.message}
               </div>
             </div>
@@ -169,23 +191,20 @@ function ChatWindow() {
       {/* Message Input Form */}
       <div className="p-4 bg-white border-t border-gray-200">
         <form onSubmit={handleSubmit(onSendMessage)} className="flex items-center space-x-3">
-          {/* 5. Styled Emoji Picker and Button */}
           <div className="relative">
             <Button
               type="button"
               onClick={() => setShowPicker(!showPicker)}
               className="p-2 rounded-full hover:bg-gray-200"
-              bgColor="bg-transparent"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-gray-500">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9 9.75a.75.75 0 01.75-.75h.008a.75.75 0 010 1.5H9.75a.75.75 0 01-.75-.75zm4.5 0a.75.75 0 01.75-.75h.008a.75.75 0 010 1.5H14.25a.75.75 0 01-.75-.75z" />
-              </svg>
-            </Button>
-            {showPicker && (
-              <div className="absolute bottom-14 left-0">
-                <EmojiPicker onEmojiClick={handleEmojiClick} />
-              </div>
-            )}
+              bgColor="bg-transparent">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}       stroke="currentColor" className="w-6 h-6 text-gray-500">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9 9.75a.75.75 0 01.75-.75h.008a.75.75 0 010 1.5H9.75a.75.75 0 01-.75-.75zm4.5 0a.75.75 0 01.75-.75h.008a.75.75 0 010 1.5H14.25a.75.75 0 01-.75-.75z" />
+                </svg>
+          </Button>
+          {showPicker && (
+            <div className="absolute bottom-14 left-0">
+              <EmojiPicker onEmojiClick={handleEmojiClick} />
+            </div>)}
           </div>
           <Input
             placeholder="Type a message..."

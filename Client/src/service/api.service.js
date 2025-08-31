@@ -39,6 +39,10 @@ const getGroups = async () =>{
   return await apiClient.get("/groups/")
 }
 
+const getGroupMessages = async (groupId) => {
+  return await apiClient.get(`/groups/${groupId}/messages`)
+}
+
 export { 
   registerUser, 
   loginUser, 
@@ -47,4 +51,5 @@ export {
   getUserList,
   getGroups,
   createGroup,
+  getGroupMessages,
 }

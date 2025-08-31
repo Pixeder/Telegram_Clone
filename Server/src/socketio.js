@@ -3,26 +3,24 @@ import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { app } from './app.js';
 import { Message } from './models/message.model.js';
-import { apiError } from './utils/ApiError.js';
+import { Group } from './models/group.model.js'; 
 
-const onlineUsers = new Map()
+const onlineUsers = new Map();
 
 const httpServer = http.createServer(app);
 
 const io = new Server(httpServer, {
     cors: {
-        origin: `${process.env.ORIGIN}`,
+        origin: process.env.ORIGIN,
         credentials: true
     }
 });
 
 io.use((socket, next) => {
     const token = socket.handshake.auth.token;
-
     if (!token) {
         return next(new Error("Authentication error: Token not provided"));
     }
-
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
         if (err) {
             return next(new Error("Authentication error: Invalid token"));
@@ -32,9 +30,23 @@ io.use((socket, next) => {
     });
 });
 
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
     const userId = socket.user.id;
+    console.log(socket.user.id)
     onlineUsers.set(userId, socket.id);
+
+    // --- 4. JOIN ROOMS LOGIC ---
+    // Find all groups the user is a member of.
+    try {
+        const userGroups = await Group.find({ members: userId });
+        // Have the user's socket join a room for each group.
+        userGroups.forEach(group => {
+            socket.join(group._id.toString());
+            console.log(`User ${userId} joined group room: ${group._id}`);
+        });
+    } catch (error) {
+        console.error("Error fetching or joining group rooms:", error);
+    }
 
     io.emit("update_online_users", Array.from(onlineUsers.keys()));
 
@@ -43,20 +55,40 @@ io.on("connection", (socket) => {
         const recipientSocketId = onlineUsers.get(recipientId);
         io.to(recipientSocketId).emit('typing_started', { senderId: socket.user.id });
     })
-
     socket.on('stop_typing',(data) => {
         const { recipientId } = data;
         const recipientSocketId = onlineUsers.get(recipientId);
         io.to(recipientSocketId).emit('typing_stopped', { senderId: socket.user.id });
     })
     
+    // --- 5. GROUP MESSAGE HANDLER ---
+    socket.on("group_message", async (data) => {
+        const { groupId, message } = data;
+        if (!groupId || !message) return;
+
+        try {
+            // Save the group message to the database
+            const newMessage = await Message.create({
+                senderId: userId,
+                groupId: groupId,
+                message: message,
+            });
+
+            // Broadcast the message to everyone in the group's room
+            io.to(groupId).emit("receive_group_message", newMessage);
+
+        } catch (error) {
+            console.error("Error handling group message:", error);
+        }
+    });
+
     socket.on("private_message", async (data) => {
         const { recipientId, message } = data;
         try {
             const newMessage = await Message.create({
                 senderId: userId,
                 recieverId: recipientId,
-                message: message,
+                content: message,
             });
 
             const recipientSocketId = onlineUsers.get(recipientId);
@@ -64,7 +96,7 @@ io.on("connection", (socket) => {
                 io.to(recipientSocketId).emit("receive_message", newMessage);
             }
         } catch (error) {
-            console.log(error.message)
+            console.error("Error saving private message:", error);
         }
     });
 
@@ -72,8 +104,7 @@ io.on("connection", (socket) => {
         onlineUsers.delete(userId);
         io.emit("update_online_users", Array.from(onlineUsers.keys()));
         console.log("❌ User disconnected:", socket.id);
-        console.log("Online users:", Array.from(onlineUsers.keys()));
     });
 });
 
-export { httpServer }
+export { httpServer };
