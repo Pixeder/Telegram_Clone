@@ -1,19 +1,17 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { getMessages, getGroupMessages } from '../service/api.service'; // 1. Import getGroupMessages
+import { getUserMessages, getGroupMessages } from '../service/api.service.js';
 import { Input, Button } from './ui';
 import { useForm } from 'react-hook-form';
-import connectSocket from '../service/socket.service';
+import connectSocket from '../service/socket.service.js';
 import EmojiPicker from 'emoji-picker-react';
 import { setOnlineUsers } from '../store/chatSlice';
 
 function ChatWindow() {
   const dispatch = useDispatch();
-  // Renamed for clarity
   const { currentUserOrGroup: selectedChat } = useSelector((state) => state.chat);
   const { user: loggedInUser, token } = useSelector((state) => state.auth);
 
-  // 2. Check to see if the selected chat is a group
   const isGroupChat = selectedChat && 'members' in selectedChat;
 
   const [messages, setMessages] = useState([]);
@@ -50,7 +48,7 @@ function ChatWindow() {
         if (isGroupChat) {
           response = await getGroupMessages(selectedChat._id);
         } else {
-          response = await getMessages(selectedChat._id);
+          response = await getUserMessages(selectedChat._id);
         }
         setMessages(response.data.data);
       } catch (error) {
@@ -77,6 +75,9 @@ function ChatWindow() {
 
     // 4. Listener for incoming group messages
     newSocket.on('receive_group_message', (newMessage) => {
+      if (newMessage.senderId === loggedInUser._id) {
+        return;
+      }
       const currentChat = selectedChatRef.current;
       if (isGroupChat && newMessage.groupId === currentChat?._id) {
         setMessages((prev) => [...prev, newMessage]);
@@ -160,7 +161,7 @@ function ChatWindow() {
 
   // 6. Dynamic header info
   const chatName = isGroupChat ? selectedChat.groupName : selectedChat.username;
-  const chatAvatar = isGroupChat ? selectedChat.groupAvatarURL : selectedChat.avatarURL;
+  const chatAvatar = isGroupChat ? selectedChat.avatarURL : selectedChat.avatarURL;
 
   return (
     <div className="flex flex-col w-full h-screen bg-white">

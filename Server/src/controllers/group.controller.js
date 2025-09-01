@@ -205,30 +205,6 @@ const getGroups = asyncHandler(async (req , res) => {
     .status(200)
     .json(new apiResponse(200, getGroups, "Groups fetched successfully"));
 
-}) 
-
-// --- GET GROUP MESSAGE ---
-const getGroupMessages = asyncHandler( async (req , res) => {
-    const { groupId } = req.params;
-
-    if(!groupId){
-        throw new apiError(401, "Invalid group Id or not found")
-    }
-
-    const groupMessages = await Group.find({
-        $or: [{ groupId : groupId }]
-    }).sort({createdAt: 'asc'})
-
-    return res
-        .status(200)
-        .json(
-            new apiResponse(
-                200,
-                groupMessages,
-                "messages fetched successfully"
-            )
-        )
-
 })
 
 export {
@@ -239,5 +215,4 @@ export {
     addAdmin,
     removeAdmin,
     getGroups,
-    getGroupMessages
 };

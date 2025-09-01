@@ -32,7 +32,6 @@ io.use((socket, next) => {
 
 io.on("connection", async (socket) => {
     const userId = socket.user.id;
-    console.log(socket.user.id)
     onlineUsers.set(userId, socket.id);
 
     // --- 4. JOIN ROOMS LOGIC ---
@@ -42,7 +41,6 @@ io.on("connection", async (socket) => {
         // Have the user's socket join a room for each group.
         userGroups.forEach(group => {
             socket.join(group._id.toString());
-            console.log(`User ${userId} joined group room: ${group._id}`);
         });
     } catch (error) {
         console.error("Error fetching or joining group rooms:", error);
@@ -88,12 +86,12 @@ io.on("connection", async (socket) => {
             const newMessage = await Message.create({
                 senderId: userId,
                 recieverId: recipientId,
-                content: message,
+                message: message,
             });
 
             const recipientSocketId = onlineUsers.get(recipientId);
             if (recipientSocketId) {
-                io.to(recipientSocketId).emit("receive_message", newMessage);
+               socket.broadcast.to(groupId).emit("receive_message", newMessage);
             }
         } catch (error) {
             console.error("Error saving private message:", error);

@@ -15,7 +15,8 @@ const messageSchema = new Schema({
       required: true,
     },
     groupId: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: "Group"
     }
   },
   { timestamps: true,}

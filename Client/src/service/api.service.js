@@ -23,8 +23,12 @@ const logoutUser = async () => {
   return await apiClient.post("/users/logout")
 }
 
-const getMessages = async (recipientId) => {
+const getUserMessages = async (recipientId) => {
   return await apiClient.get(`/messages/${recipientId}`)
+}
+
+const getGroupMessages = async (groupId) => {
+  return await apiClient.get(`/messages/groups/${groupId}`)
 }
 
 const getUserList = async () =>{
@@ -39,15 +43,11 @@ const getGroups = async () =>{
   return await apiClient.get("/groups/")
 }
 
-const getGroupMessages = async (groupId) => {
-  return await apiClient.get(`/groups/${groupId}/messages`)
-}
-
 export { 
   registerUser, 
   loginUser, 
   logoutUser, 
-  getMessages,
+  getUserMessages,
   getUserList,
   getGroups,
   createGroup,
