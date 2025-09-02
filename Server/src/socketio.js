@@ -73,7 +73,7 @@ io.on("connection", async (socket) => {
             });
 
             // Broadcast the message to everyone in the group's room
-            io.to(groupId).emit("receive_group_message", newMessage);
+            socket.broadcast.to(groupId).emit("receive_group_message", newMessage);
 
         } catch (error) {
             console.error("Error handling group message:", error);
@@ -91,7 +91,7 @@ io.on("connection", async (socket) => {
 
             const recipientSocketId = onlineUsers.get(recipientId);
             if (recipientSocketId) {
-               socket.broadcast.to(groupId).emit("receive_message", newMessage);
+                io.to(recipientSocketId).emit("receive_message", newMessage);
             }
         } catch (error) {
             console.error("Error saving private message:", error);

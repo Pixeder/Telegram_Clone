@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import connectSocket from '../service/socket.service.js';
 import EmojiPicker from 'emoji-picker-react';
 import { setOnlineUsers } from '../store/chatSlice';
+import { encryptMessage , decryptMessage } from '../utils/ETEE.js';
 
 function ChatWindow() {
   const dispatch = useDispatch();
@@ -13,6 +14,7 @@ function ChatWindow() {
   const { user: loggedInUser, token } = useSelector((state) => state.auth);
 
   const isGroupChat = selectedChat && 'members' in selectedChat;
+  const secretKey = selectedChat ? ( isGroupChat ? selectedChat._id : [loggedInUser._id , selectedChat._id].sort().join('')) : null;
 
   const [messages, setMessages] = useState([]);
   const [socket, setSocket] = useState(null);
@@ -50,7 +52,11 @@ function ChatWindow() {
         } else {
           response = await getUserMessages(selectedChat._id);
         }
-        setMessages(response.data.data);
+        const decryptedMessage = response.data.data.map( (msg) => ({
+          ...msg,
+          message: decryptMessage(msg.message , secretKey),
+        }))
+        setMessages(decryptedMessage);
       } catch (error) {
         console.error("Failed to fetch messages:", error.message);
       }
@@ -69,7 +75,11 @@ function ChatWindow() {
     newSocket.on('receive_message', (newMessage) => {
       const currentChatPartner = selectedChatRef.current;
       if (!isGroupChat && newMessage.senderId === currentChatPartner?._id) {
-        setMessages((prev) => [...prev, newMessage]);
+        const decryptedMessage = decryptMessage(newMessage.message , secretKey)
+        setMessages((prev) => [...prev, {
+          ...newMessage ,
+          message: decryptedMessage,
+        }]);
       }
     });
 
@@ -80,7 +90,11 @@ function ChatWindow() {
       }
       const currentChat = selectedChatRef.current;
       if (isGroupChat && newMessage.groupId === currentChat?._id) {
-        setMessages((prev) => [...prev, newMessage]);
+        const decryptedMessage = decryptMessage(newMessage.message , secretKey)
+        setMessages((prev) => [...prev, {
+          ...newMessage ,
+          message: decryptedMessage,
+        }]);
       }
     });
 
@@ -127,13 +141,14 @@ function ChatWindow() {
 
     let payload;
     let eventName;
+    const message = encryptMessage(data.message , secretKey);
 
     if (isGroupChat) {
       eventName = 'group_message';
-      payload = { groupId: selectedChat._id, message: data.message };
+      payload = { groupId: selectedChat._id, message: message };
     } else {
       eventName = 'private_message';
-      payload = { recipientId: selectedChat._id, message: data.message };
+      payload = { recipientId: selectedChat._id, message: message };
     }
     
     socket.emit(eventName, payload);
