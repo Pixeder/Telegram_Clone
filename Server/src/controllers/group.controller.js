@@ -193,7 +193,7 @@ const getGroups = asyncHandler(async (req , res) => {
     throw new apiError(401 , "User is not logged in ")
   }
 
-  const getGroups = await Group.find({ members: userId }).sort({createdBy: 'asc'});
+  const getGroups = await Group.find({ members: {$in : [userId]} });
 
   if(getGroups.length === 0){
     return res

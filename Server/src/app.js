@@ -9,8 +9,8 @@ app.use(cors({
     credentials: true,
 }))
 
-app.use(express.json({limit: "16kb",}))
-app.use(express.urlencoded({extended: true , limit: "16kb"}))
+app.use(express.json({limit: "50mb",}))
+app.use(express.urlencoded({extended: true , limit: "50mb"}))
 app.use(express.static("public"))
 app.use(cookieparser())
 
@@ -26,5 +26,9 @@ app.use('/api/v1/messages', messageRouter)
 import groupRouter from './routes/group.route.js'
 
 app.use('/api/v1/groups', groupRouter)
+
+import fileRouter from './routes/file.route.js'
+
+app.use('/api/v1/files',fileRouter)
 
 export { app }
