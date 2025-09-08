@@ -5,10 +5,17 @@ import { verifyJWT } from "../middleware/auth.middlware.js";
 
 const fileRouter = Router();
 
-fileRouter.route('/upload')
+fileRouter.route('/uploadSignUpAvatar')
   .post(
     upload.single("file"),
     uploadFile
   );
+
+fileRouter.route('/upload')
+  .post(
+    verifyJWT,
+    upload.single("file"),
+    uploadFile,
+  )
 
 export default fileRouter;

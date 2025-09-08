@@ -20,6 +20,7 @@ function ChatWindow() {
   const [socket, setSocket] = useState(null);
   const [showPicker, setShowPicker] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  cosnt [selectedFile , setSelectedFile] = useState(null);
   
   const { register, handleSubmit, reset, setValue, getValues, watch } = useForm();
   

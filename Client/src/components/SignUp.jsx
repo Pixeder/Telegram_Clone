@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button, Input } from './ui';
-import { registerUser, uploadFile } from '../service/api.service';
+import { registerUser, uploadSignUpAvatar } from '../service/api.service';
 import { useNavigate, Link } from 'react-router-dom';
 
 function SignUp() {
@@ -53,7 +53,7 @@ function SignUp() {
       let finalAvatarUrl = selectedAvatarUrl;
 
       if (uploadedFile) {
-        const uploadResponse = await uploadFile(uploadedFile);
+        const uploadResponse = await uploadSignUpAvatar(uploadedFile);
         finalAvatarUrl = uploadResponse.url;
       }
 

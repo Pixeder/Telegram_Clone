@@ -51,14 +51,14 @@ export const getGroups = () => {
 
 // --- File Upload Function ---
 // 3. RENAMED & CORRECTED: Renamed for clarity and fixed the logic.
-export const uploadFile = async (file) => {
+export const uploadSignUpAvatar = async (file) => {
   const formData = new FormData();
   // The field name "file" MUST match what the backend (Multer) expects
   formData.append("file", file);
 
   try {
     // 4. CORRECTED: The URL must match the backend route exactly.
-    const response = await apiClient.post("/files/upload", formData, {
+    const response = await apiClient.post("/files/uploadSignUpAvatar", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -71,3 +71,21 @@ export const uploadFile = async (file) => {
     throw error;
   }
 };
+
+export const uploadFile = async (file) => {
+  const formData = new FormData();
+  formData.append('file' , file);
+
+  try {
+    const response = await apiClient.post("/files/upload" , formData , {
+      headers: {
+          "Content-Type": "multipart/form-data",
+      },
+    })
+  
+    return response.data.data;
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    throw error;
+  }
+}

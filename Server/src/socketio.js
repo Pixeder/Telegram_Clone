@@ -61,8 +61,8 @@ io.on("connection", async (socket) => {
     
     // --- 5. GROUP MESSAGE HANDLER ---
     socket.on("group_message", async (data) => {
-        const { groupId, message } = data;
-        if (!groupId || !message) return;
+        const { groupId ,message ,fileURL ,fileType } = data;
+        if (!groupId || (!message && !fileURL)) return;
 
         try {
             // Save the group message to the database
@@ -70,6 +70,8 @@ io.on("connection", async (socket) => {
                 senderId: userId,
                 groupId: groupId,
                 message: message,
+                fileURL,
+                fileType,
             });
 
             // Broadcast the message to everyone in the group's room
@@ -81,12 +83,14 @@ io.on("connection", async (socket) => {
     });
 
     socket.on("private_message", async (data) => {
-        const { recipientId, message } = data;
+        const { recipientId, message , fileURL , fileType } = data;
         try {
             const newMessage = await Message.create({
                 senderId: userId,
                 recieverId: recipientId,
                 message: message,
+                fileURL,
+                fileType,
             });
 
             const recipientSocketId = onlineUsers.get(recipientId);

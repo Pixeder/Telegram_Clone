@@ -12,11 +12,16 @@ const messageSchema = new Schema({
     },
     message: {
       type: String,
-      required: true,
     },
     groupId: {
       type: Schema.Types.ObjectId,
       ref: "Group"
+    },
+    fileURL: {
+      type: String,
+    },
+    fileType: {
+      type: String,
     }
   },
   { timestamps: true,}
