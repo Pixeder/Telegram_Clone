@@ -7,8 +7,10 @@ import UserSideBar from "./UserSideBar";
 import ChatWindow from "./ChatWindow";
 import CreateGroupPopup from "./CreateGroupPopup";
 import Profile from './Profile'
+import FileUploadModal from "./FileUploadModal";
 
 export {
+  FileUploadModal,
   ChatWindow,
   UserSideBar,
   AuthLayout,

@@ -104,7 +104,7 @@ function SignUp() {
           </div>
           <div className="text-center">
             <p className="text-sm text-gray-500 mb-2">Or upload your own</p>
-            <input type="file" ref={fileInputRef} onChange={onChangeUploadedFile} className="hidden" accept="image/*" />
+            <Input type="file" ref={fileInputRef} onChange={onChangeUploadedFile} className="hidden" accept="image/*" />
             <Button type="button" onClick={() => fileInputRef.current.click()} bgColor="bg-gray-200" textColor="text-black">
               Upload a file
             </Button>
