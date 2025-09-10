@@ -32,6 +32,7 @@ const getUserMessages = asyncHandler( async (req , res) => {
 const getGroupMessages = asyncHandler( async (req , res) => {
   const groupId = req.params.groupId;
   const senderId = req.user?._id
+  console.log(groupId)
   
   if(!groupId && !mongoose.Types.ObjectId.isValid(groupId)){
     throw new apiError(401, "Invalid group Id or not found")

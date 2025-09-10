@@ -38,10 +38,11 @@ function FileUploadModal({ onClose, onSendFile }) {
     try {
 
         const { url, fileType } = await uploadFile(uploadedFile);
+        console.log(fileType , url)
 
         onSendFile({
             message: data.message,
-            fileUrl: url,
+            fileURL: url,
             fileType: fileType,
         });
 

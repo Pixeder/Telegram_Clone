@@ -37,7 +37,7 @@ export const getUserMessages = (recipientId) => {
 
 // 2. CORRECTED: The route for group messages was updated to be more RESTful
 export const getGroupMessages = (groupId) => {
-  return apiClient.get(`/messages/group/${groupId}`);
+  return apiClient.get(`/messages/groups/${groupId}`);
 };
 
 // --- Group Functions ---

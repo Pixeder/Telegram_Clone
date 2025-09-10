@@ -6,7 +6,8 @@ import { useForm } from 'react-hook-form';
 import connectSocket from '../service/socket.service.js';
 import EmojiPicker from 'emoji-picker-react';
 import { setOnlineUsers } from '../store/chatSlice';
-import FileUploadModal from './FileUploadModal.jsx'; // 1. Ensure modal is imported
+import { decryptMessage , encryptMessage } from '../utils/ETEE.js';
+import FileUploadModal from './FileUploadModal.jsx';
 
 function ChatWindow() {
   const dispatch = useDispatch();
@@ -14,12 +15,12 @@ function ChatWindow() {
   const { user: loggedInUser, token } = useSelector((state) => state.auth);
 
   const isGroupChat = selectedChat && 'members' in selectedChat;
+  const secretKey = selectedChat ? ( isGroupChat ? selectedChat._id : [loggedInUser._id , selectedChat._id].sort().join('')) : null;
 
   const [messages, setMessages] = useState([]);
   const [socket, setSocket] = useState(null);
   const [showPicker, setShowPicker] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  // 2. State to control the file upload modal visibility
   const [isFileUploadOpen, setIsFileUploadOpen] = useState(false);
   
   const { register, handleSubmit, reset, setValue, getValues, watch } = useForm();
@@ -52,7 +53,10 @@ function ChatWindow() {
         } else {
           response = await getUserMessages(selectedChat._id);
         }
-        setMessages(response.data.data);
+        const decryptedMessages = response.data.data.map((msg) => ({
+          ...msg,
+          message: decryptMessage(msg.message , secretKey),}))
+          setMessages(decryptedMessages);
       } catch (error) {
         console.error("Failed to fetch messages:", error.message);
       }
@@ -69,15 +73,21 @@ function ChatWindow() {
     newSocket.on('receive_message', (newMessage) => {
       const currentChatPartner = selectedChatRef.current;
       if (!isGroupChat && newMessage.senderId === currentChatPartner?._id) {
-        setMessages((prev) => [...prev, newMessage]);
-      }
+       const decryptedMessage = decryptMessage(newMessage.message , secretKey)
+        setMessages((prev) => [...prev, {
+          ...newMessage ,
+          message: decryptedMessage,}]);
+        }
     });
 
     newSocket.on('receive_group_message', (newMessage) => {
       if (newMessage.senderId === loggedInUser?._id) return;
       const currentChat = selectedChatRef.current;
       if (isGroupChat && newMessage.groupId === currentChat?._id) {
-        setMessages((prev) => [...prev, newMessage]);
+        const decryptedMessage = decryptMessage(newMessage.message , secretKey)
+        setMessages((prev) => [...prev, {
+          ...newMessage ,
+          message: decryptedMessage,}]);
       }
     });
 
@@ -127,18 +137,19 @@ function ChatWindow() {
   };
 
   // 3. NEW: Universal handler for sending text, files, or both
-  const handleSend = ({ message, fileUrl, fileType }) => {
-    if (!socket || (!message?.trim() && !fileUrl) || !selectedChat) return;
-
+  const handleSend = ({ message, fileURL, fileType }) => {
+    if (!socket || (!message?.trim() && !fileURL) || !selectedChat) return;
+    
     let payload;
     let eventName;
+    const encryptedMessages = encryptMessage(message , secretKey);
     
     if (isGroupChat) {
         eventName = 'group_message';
-        payload = { groupId: selectedChat._id, message, fileUrl, fileType };
+        payload = { groupId: selectedChat._id, message: encryptedMessages, fileURL, fileType };
     } else {
         eventName = 'private_message';
-        payload = { recipientId: selectedChat._id, message, fileUrl, fileType };
+        payload = { recipientId: selectedChat._id, message: encryptedMessages, fileURL, fileType };
     }
     
     socket.emit(eventName, payload);
@@ -147,7 +158,7 @@ function ChatWindow() {
         _id: Date.now(),
         senderId: loggedInUser._id,
         message: message,
-        fileUrl: fileUrl,
+        fileURL: fileURL,
         fileType: fileType,
         createdAt: new Date().toISOString(),
         ...(isGroupChat ? { groupId: selectedChat._id } : { recipientId: selectedChat._id })
@@ -165,7 +176,7 @@ function ChatWindow() {
   }
 
   const chatName = isGroupChat ? selectedChat.groupName : selectedChat.username;
-  const chatAvatar = isGroupChat ? selectedChat.groupAvatarURL : selectedChat.avatarURL;
+  const chatAvatar = isGroupChat ? selectedChat.avatarURL : selectedChat.avatarURL;
 
   return (
     <>
@@ -186,12 +197,12 @@ function ChatWindow() {
             return (
               <div key={message._id} className={`flex mb-4 ${isSentByMe ? 'justify-end' : 'justify-start'}`}>
                 <div className={`rounded-lg px-3 py-2 max-w-sm flex flex-col ${isSentByMe ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}>
-                  {/* 4. NEW: Render image if fileUrl exists */}
-                  {message.fileUrl && message.fileType === 'image' && (
-                    <img src={message.fileUrl} alt="shared message" className="rounded-md max-w-xs mb-2" />
+                  {/* 4. NEW: Render image if fileURL exists */}
+                  {message.fileURL && message.fileType === 'image' && (
+                    <img src={message.fileURL} alt="shared message" className="rounded-md max-w-xs mb-2 w-50" />
                   )}
-                  {message.fileUrl && message.fileType !== 'image' && (
-                     <a href={message.fileUrl} target="_blank" rel="noopener noreferrer" className="block p-2 bg-gray-500/20 rounded-md hover:underline">
+                  {message.fileURL && message.fileType !== 'image' && (
+                     <a href={message.fileURL} target="_blank" rel="noopener noreferrer" className="block p-2 bg-gray-500/20 rounded-md hover:underline">
                         Download File
                      </a>
                   )}
@@ -217,18 +228,20 @@ function ChatWindow() {
             </div>
 
             {/* 5. NEW: Attach File Button */}
-            <Button type="button" onClick={() => setIsFileUploadOpen(true)} className="p-2 rounded-full hover:bg-gray-200" bgColor="bg-transparent">
+            <div className='w-'>
+              <Button type="button" onClick={() => setIsFileUploadOpen(true)} className="p-2 rounded-full hover:bg-gray-200" bgColor="bg-transparent">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-gray-500">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.122 2.122l7.81-7.81" />
                 </svg>
             </Button>
+            </div>
             
             <Input
               placeholder="Type a message..."
               className="flex-1"
               {...register('message')}
             />
-            <Button type="submit">Send</Button>
+            <div className='w-40'><Button type="submit">Send</Button></div>
           </form>
         </div>
       </div>

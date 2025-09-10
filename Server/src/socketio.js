@@ -63,7 +63,7 @@ io.on("connection", async (socket) => {
     socket.on("group_message", async (data) => {
         const { groupId ,message ,fileURL ,fileType } = data;
         if (!groupId || (!message && !fileURL)) return;
-
+        
         try {
             // Save the group message to the database
             const newMessage = await Message.create({
@@ -81,9 +81,10 @@ io.on("connection", async (socket) => {
             console.error("Error handling group message:", error);
         }
     });
-
+    
     socket.on("private_message", async (data) => {
         const { recipientId, message , fileURL , fileType } = data;
+        console.log(fileURL)
         try {
             const newMessage = await Message.create({
                 senderId: userId,
