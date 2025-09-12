@@ -9,7 +9,6 @@ function FileUploadModal({ onClose, onSendFile }) {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
   const { register, handleSubmit, watch } = useForm();
-  const messageValue = watch("message");
 
   useEffect(() => {
     if (!uploadedFile) {

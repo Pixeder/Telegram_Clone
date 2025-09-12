@@ -2,19 +2,17 @@ import { asyncHandler } from "../utils/AsyncHandler.js";
 import { apiError } from "../utils/ApiError.js";
 import { apiResponse } from "../utils/ApiResponse.js";
 import { Group } from "../models/group.model.js";
+import { Member } from '../models/member.model.js'
 
 // --- CREATE GROUP ---
 const createGroup = asyncHandler(async (req, res) => {
-    // Get groupName and members from body. 'createdBy' comes from the logged-in user.
     const { groupName , members } = req.body;
-    const createdBy = req.user._id; // The creator is always the person making the request.
+    const createdBy = req.user._id;
 
-    // More robust validation.
     if (!groupName?.trim() || !members || !Array.isArray(members) || members.length === 0) {
         throw new apiError(400, "Group name and at least one member are required.");
     }
 
-    // The creator is automatically an admin and a member.
     const initialAdmins = [createdBy];
     // Use a Set to prevent the creator from being added twice if they are also in the members list.
     const allMembers = [...new Set([...members , createdBy])];
@@ -25,6 +23,17 @@ const createGroup = asyncHandler(async (req, res) => {
         admins: initialAdmins,
         members: allMembers,
     });
+
+    allMembers.map(async (member) => {
+        const isAdmin = member && initialAdmins.includes(member) ;
+        const isCreatedByUser = member === createdBy;
+        await Member.create({
+            groupId: group._id,
+            userId: member,
+            isAdmin,
+            isCreatedByUser,
+        })
+    })
 
     return res.status(201).json(new apiResponse(201, group, "Group created successfully"));
 });
@@ -204,6 +213,11 @@ const getGroups = asyncHandler(async (req , res) => {
   return res
     .status(200)
     .json(new apiResponse(200, getGroups, "Groups fetched successfully"));
+
+})
+
+// --- GET GROUPS MEMBERS DATA ---
+const getGroupsMembersData = asyncHandler(async (req , res) => {
 
 })
 

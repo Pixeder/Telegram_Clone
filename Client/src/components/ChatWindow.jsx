@@ -7,21 +7,22 @@ import connectSocket from '../service/socket.service.js';
 import EmojiPicker from 'emoji-picker-react';
 import { setOnlineUsers } from '../store/chatSlice';
 import { decryptMessage , encryptMessage } from '../utils/ETEE.js';
-import FileUploadModal from './FileUploadModal.jsx';
+import { Profile , FileUploadModal } from './index.js'
 
 function ChatWindow() {
   const dispatch = useDispatch();
   const { currentUserOrGroup: selectedChat } = useSelector((state) => state.chat);
   const { user: loggedInUser, token } = useSelector((state) => state.auth);
-
+  
   const isGroupChat = selectedChat && 'members' in selectedChat;
   const secretKey = selectedChat ? ( isGroupChat ? selectedChat._id : [loggedInUser._id , selectedChat._id].sort().join('')) : null;
-
+  
   const [messages, setMessages] = useState([]);
   const [socket, setSocket] = useState(null);
   const [showPicker, setShowPicker] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [isFileUploadOpen, setIsFileUploadOpen] = useState(false);
+  const [isProfileOpen , setIsProfileOpen] = useState(false);
   
   const { register, handleSubmit, reset, setValue, getValues, watch } = useForm();
   
@@ -33,13 +34,13 @@ function ChatWindow() {
   useEffect(() => {
     selectedChatRef.current = selectedChat;
   }, [selectedChat]);
-
+  
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-
+  
   useEffect(scrollToBottom, [messages]);
-
+  
   useEffect(() => {
     const fetchMessages = async () => {
       if (!selectedChat?._id) {
@@ -57,6 +58,7 @@ function ChatWindow() {
           ...msg,
           message: decryptMessage(msg.message , secretKey),}))
           setMessages(decryptedMessages);
+          console.log(selectedChat)
       } catch (error) {
         console.error("Failed to fetch messages:", error.message);
       }
@@ -177,18 +179,24 @@ function ChatWindow() {
 
   const chatName = isGroupChat ? selectedChat.groupName : selectedChat.username;
   const chatAvatar = isGroupChat ? selectedChat.avatarURL : selectedChat.avatarURL;
-
+  // console.log(selectedChat)
   return (
     <>
       <div className="flex flex-col w-full h-screen bg-white">
         {/* Chat Header */}
         <div className="flex items-center p-3 border-b border-gray-200">
-          <img src={chatAvatar} alt="Avatar" className="w-10 h-10 rounded-full mr-3 object-cover" />
-          <div className='flex flex-col'>
-            <p className="text-lg font-bold">{chatName}</p>
-            {!isGroupChat && isTyping && <p className="text-sm text-blue-500">is typing...</p>}
+          <div
+            onClick={() => setIsProfileOpen(true)}
+              className='flex items-center w-80 cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition-colors'>
+                <img src={chatAvatar} alt="Avatar" className="w-10 h-10 rounded-full mr-3 object-cover" />
+                <div className='flex flex-col'>
+                <p className="text-lg font-bold">{chatName}</p>
+                {!isGroupChat && isTyping && <p className="text-sm text-blue-500">is typing...</p>}
+          </div>
           </div>
         </div>
+        
+        {isProfileOpen && <Profile onClose={() => setIsProfileOpen(false)} />}
 
         {/* Message List */}
         <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
