@@ -33,6 +33,7 @@ function UserSideBar({
         ]);
         dispatch(setUsers(userResponse.data.data));
         dispatch(setGroups(groupResponse.data.data));
+        // console.log(groupResponse.data.data)
       } catch (error) {
         console.error("Failed to fetch sidebar data:", error.message);
       }

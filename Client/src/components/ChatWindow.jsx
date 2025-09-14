@@ -14,7 +14,7 @@ function ChatWindow() {
   const { currentUserOrGroup: selectedChat } = useSelector((state) => state.chat);
   const { user: loggedInUser, token } = useSelector((state) => state.auth);
   
-  const isGroupChat = selectedChat && 'members' in selectedChat;
+  const isGroupChat = selectedChat && 'groupName' in selectedChat;
   const secretKey = selectedChat ? ( isGroupChat ? selectedChat._id : [loggedInUser._id , selectedChat._id].sort().join('')) : null;
   
   const [messages, setMessages] = useState([]);
@@ -58,7 +58,7 @@ function ChatWindow() {
           ...msg,
           message: decryptMessage(msg.message , secretKey),}))
           setMessages(decryptedMessages);
-          console.log(selectedChat)
+          // console.log(selectedChat)
       } catch (error) {
         console.error("Failed to fetch messages:", error.message);
       }
@@ -178,6 +178,7 @@ function ChatWindow() {
   }
 
   const chatName = isGroupChat ? selectedChat.groupName : selectedChat.username;
+  // console.log(selectedChat)
   const chatAvatar = isGroupChat ? selectedChat.avatarURL : selectedChat.avatarURL;
   // console.log(selectedChat)
   return (

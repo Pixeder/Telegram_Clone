@@ -3,6 +3,7 @@ import { apiError } from "../utils/ApiError.js";
 import { apiResponse } from "../utils/ApiResponse.js";
 import { Group } from "../models/group.model.js";
 import { Member } from '../models/member.model.js'
+import { User } from "../models/user.model.js"
 
 // --- CREATE GROUP ---
 const createGroup = asyncHandler(async (req, res) => {
@@ -19,9 +20,6 @@ const createGroup = asyncHandler(async (req, res) => {
 
     const group = await Group.create({
         groupName,
-        createdBy,
-        admins: initialAdmins,
-        members: allMembers,
     });
 
     allMembers.map(async (member) => {
@@ -202,9 +200,34 @@ const getGroups = asyncHandler(async (req , res) => {
     throw new apiError(401 , "User is not logged in ")
   }
 
-  const getGroups = await Group.find({ members: {$in : [userId]} });
+  const groups = await Member.aggregate([
+    {
+        $lookup:{
+            from: "groups",
+            localField: "groupId",
+            foreignField: "_id",
+            as: "groupData",
+        }
+    },
+    {
+        $project: {
+    	    "userId": 1,
+    	    "groupData": 1,
+        }
+    },
+    {
+        $match: {
+            "userId": userId,
+        }
+    }
+  ])
+  let allGroupsUserIsPartOf = [];
+  groups.map((group) => {
+    allGroupsUserIsPartOf.push(group.groupData[0])
+  })
+//   console.log(allGroupsUserIsPartOf)
 
-  if(getGroups.length === 0){
+  if(allGroupsUserIsPartOf.length === 0){
     return res
       .status(200)
       .json(new apiResponse(200, {} , "User is not a member of any groups"));
@@ -212,7 +235,7 @@ const getGroups = asyncHandler(async (req , res) => {
 
   return res
     .status(200)
-    .json(new apiResponse(200, getGroups, "Groups fetched successfully"));
+    .json(new apiResponse(200, allGroupsUserIsPartOf , "Groups fetched successfully"));
 
 })
 
