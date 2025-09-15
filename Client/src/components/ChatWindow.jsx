@@ -5,7 +5,7 @@ import { Input, Button } from './ui';
 import { useForm } from 'react-hook-form';
 import connectSocket from '../service/socket.service.js';
 import EmojiPicker from 'emoji-picker-react';
-import { setOnlineUsers } from '../store/chatSlice';
+import { setOnlineUsers, setIsProfileOpen } from '../store/chatSlice';
 import { decryptMessage, encryptMessage } from '../utils/ETEE.js';
 import { Profile, FileUploadModal } from './index.js';
 
@@ -26,7 +26,6 @@ function ChatWindow() {
   const [showPicker, setShowPicker] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [isFileUploadOpen, setIsFileUploadOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const { register, handleSubmit, reset, setValue, getValues, watch } = useForm();
 
@@ -204,7 +203,7 @@ function ChatWindow() {
         {/* Chat Header */}
         <div className='flex items-center border-b border-gray-200 p-3'>
           <div
-            onClick={() => setIsProfileOpen(true)}
+            onClick={() => dispatch(setIsProfileOpen(true))}
             className='flex w-80 cursor-pointer items-center rounded-lg p-2 transition-colors hover:bg-gray-100'
           >
             <img
@@ -218,8 +217,6 @@ function ChatWindow() {
             </div>
           </div>
         </div>
-
-        {isProfileOpen && <Profile onClose={() => setIsProfileOpen(false)} />}
 
         {/* Message List */}
         <div className='flex-1 overflow-y-auto bg-gray-50 p-4'>

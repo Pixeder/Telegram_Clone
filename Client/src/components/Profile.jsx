@@ -45,11 +45,11 @@ function Profile({ onClose }) {
 
   return (
     // Backdrop Overlay
-    <div onClick={onClose} className='bg-opacity-30 fixed inset-0 z-40 bg-black backdrop-blur-sm'>
+    <div onClick={onClose} className='bg-opacity-30 fixed inset-0 z-4 '>
       {/* Profile Panel */}
       <div
         onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the panel
-        className='fixed top-0 right-0 z-50 h-full w-full max-w-sm transform bg-white shadow-xl transition-transform duration-300 ease-in-out'
+        className='fixed bottom-0 right-0 z-50 h-full w-full max-w-sm transform bg-white shadow-xl transition-transform duration-300 ease-in-out'
       >
         <div className='flex h-full flex-col'>
           {/* Header */}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState ,useEffect } from 'react';
 import { Input, Button } from './ui';
 import { useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
@@ -46,9 +46,16 @@ function CreateGroupPopup({ onClose }) {
     }
   };
 
+   useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'unset';
+        }
+    } , [])
+
   return (
     // 3. Modal Overlay: Covers the screen with a semi-transparent backdrop
-    <div className='bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black'>
+    <div className='bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm'>
       {/* Modal Card */}
       <div className='flex w-full max-w-md flex-col rounded-lg bg-white p-6 shadow-xl'>
         {/* Modal Header */}

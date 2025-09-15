@@ -53,8 +53,15 @@ function FileUploadModal({ onClose, onSendFile }) {
     }
   };
 
+   useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'unset';
+        }
+    } , [])
+
   return (
-    <div className='bg-opacity-25 fixed inset-0 z-50 flex items-center justify-center bg-black backdrop-blur-sm'>
+    <div className='bg-opacity-25 fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm'>
       <div className='w-full max-w-lg space-y-4 rounded-lg bg-white p-6 shadow-xl'>
         <div className='flex items-center justify-between'>
           <h3 className='text-xl font-bold'>Share a File</h3>

@@ -5,6 +5,7 @@ const initialState = {
   groups: [],
   currentUserOrGroup: null,
   onlineUsers: [],
+  isProfileOpen: false,
 };
 
 const chatSlice = createSlice({
@@ -23,8 +24,11 @@ const chatSlice = createSlice({
     setGroups: (state, action) => {
       state.groups = action.payload;
     },
+    setIsProfileOpen: (state , action) => {
+      state.isProfileOpen = action.payload;
+    }
   },
 });
 
-export const { setUsers, setCurrentUserOrGroup, setOnlineUsers, setGroups } = chatSlice.actions;
+export const { setUsers, setCurrentUserOrGroup, setOnlineUsers, setGroups, setIsProfileOpen } = chatSlice.actions;
 export default chatSlice.reducer;

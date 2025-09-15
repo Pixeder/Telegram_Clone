@@ -8,8 +8,10 @@ import ChatWindow from './ChatWindow';
 import CreateGroupPopup from './CreateGroupPopup';
 import Profile from './Profile';
 import FileUploadModal from './FileUploadModal';
+import IconSidebar from './IconSideBar';
 
 export {
+  IconSidebar,
   FileUploadModal,
   ChatWindow,
   UserSideBar,
