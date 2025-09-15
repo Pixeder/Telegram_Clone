@@ -241,7 +241,67 @@ const getGroups = asyncHandler(async (req , res) => {
 
 // --- GET GROUPS MEMBERS DATA ---
 const getGroupsMembersData = asyncHandler(async (req , res) => {
+    const { groupId } = req.params;
 
+    if(!groupId){
+        throw new apiError(401 , "GroupId is not found in getGroupsMembersData");
+    }
+
+    const members = await Member.aggregate([
+        {
+            $lookup:{
+                from: "users",
+                localField: "userId",
+                foreignField: "_id",
+                as: "membersData"
+            }
+        },
+        {
+            $unwind: "$membersData"
+        },
+        {
+            $addFields:{
+                "fullName": "$membersData.fullName",
+                "username": "$membersData.username",
+                "avatarURL": "$membersData.avatarURL",
+            }
+        },
+        {
+            $project:{
+                "isAdmin": 1,
+                "isCreatedByUser": 1,
+                "username": 1,
+                "fullName": 1,
+                "avatarURL": 1,
+                "userId": 1,
+                "groupId": 1,
+            }
+        },
+        {
+            $match:{
+                $expr: {
+                    $eq: [ "$groupId", { $toObjectId: groupId } ]
+                }
+            }
+        },
+        {
+            $sort:{
+                isAdmin: -1,
+            }
+        }
+    ])
+
+    return res
+        .status(200)
+        .json(
+            new apiResponse(
+                200,
+                members,
+                "Groups members data fectched successfully",
+            )
+        )
+
+    
 })
 
 export {
@@ -252,4 +312,5 @@ export {
     addAdmin,
     removeAdmin,
     getGroups,
+    getGroupsMembersData,
 };

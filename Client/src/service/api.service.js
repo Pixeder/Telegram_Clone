@@ -40,6 +40,10 @@ export const getGroupMessages = (groupId) => {
   return apiClient.get(`/messages/groups/${groupId}`);
 };
 
+export const getGroupsMembersData = async (groupId) => {
+  return await apiClient.get(`/groups/${groupId}/members`)
+}
+
 // --- Group Functions ---
 export const createGroup = (data) => {
   return apiClient.post("/groups/", data);
