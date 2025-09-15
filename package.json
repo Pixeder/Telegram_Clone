@@ -6,7 +6,9 @@
   "scripts": {
     "start:server": "cd server && npm start",
     "start:client": "cd client && npm run dev",
-    "dev": "concurrently \"npm:start:server\" \"npm:start:client\""
+    "dev": "concurrently \"npm:start:server\" \"npm:start:client\"",
+    "format:check": "prettier --check .",
+    "format:write": "prettier --write ."
   },
   "repository": {
     "type": "git",
@@ -22,5 +24,8 @@
   "homepage": "https://github.com/Pixeder/Telegram_Clone#readme",
   "dependencies": {
     "concurrently": "^9.2.1"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
   }
 }
