@@ -1,30 +1,31 @@
-import { Schema , model } from "mongoose";
+import { Schema, model } from 'mongoose';
 
-const messageSchema = new Schema({
+const messageSchema = new Schema(
+  {
     senderId: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     recieverId: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
     },
     message: {
       type: String,
     },
     groupId: {
       type: Schema.Types.ObjectId,
-      ref: "Group"
+      ref: 'Group',
     },
     fileURL: {
       type: String,
     },
     fileType: {
       type: String,
-    }
+    },
   },
-  { timestamps: true,}
-)
+  { timestamps: true }
+);
 
-export const Message = model("Message" , messageSchema)
+export const Message = model('Message', messageSchema);

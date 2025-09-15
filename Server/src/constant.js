@@ -1,1 +1,1 @@
-export const db_name = "telegram"
+export const db_name = 'telegram';

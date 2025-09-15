@@ -1,13 +1,13 @@
-import Login from "./Login";
-import SignUp from "./SignUp";
-import Header from "./Header";
-import Footer from "./Footer";
-import AuthLayout from "./AuthLayout";
-import UserSideBar from "./UserSideBar";
-import ChatWindow from "./ChatWindow";
-import CreateGroupPopup from "./CreateGroupPopup";
-import Profile from './Profile'
-import FileUploadModal from "./FileUploadModal";
+import Login from './Login';
+import SignUp from './SignUp';
+import Header from './Header';
+import Footer from './Footer';
+import AuthLayout from './AuthLayout';
+import UserSideBar from './UserSideBar';
+import ChatWindow from './ChatWindow';
+import CreateGroupPopup from './CreateGroupPopup';
+import Profile from './Profile';
+import FileUploadModal from './FileUploadModal';
 
 export {
   FileUploadModal,
@@ -20,4 +20,4 @@ export {
   SignUp,
   CreateGroupPopup,
   Profile,
-}
+};

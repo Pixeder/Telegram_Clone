@@ -12,9 +12,9 @@ export const decryptMessage = (ciphertext, secret) => {
     const bytes = CryptoJS.AES.decrypt(ciphertext, secret);
     const originalText = bytes.toString(CryptoJS.enc.Utf8);
     // If decryption fails (e.g., wrong key), originalText will be empty.
-    return originalText || "[Decryption failed]";
+    return originalText || '[Decryption failed]';
   } catch (error) {
-    console.error("Decryption error:", error);
-    return "[Decryption failed]";
+    console.error('Decryption error:', error);
+    return '[Decryption failed]';
   }
 };

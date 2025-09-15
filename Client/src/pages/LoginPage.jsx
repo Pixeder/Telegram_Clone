@@ -1,13 +1,13 @@
-import React from 'react'
-import { Container } from '../components/ui'
-import { Login } from '../components/index'
+import React from 'react';
+import { Container } from '../components/ui';
+import { Login } from '../components/index';
 
 function LoginPage() {
   return (
     <Container>
-      <Login/>
+      <Login />
     </Container>
-  )
+  );
 }
 
-export default LoginPage
+export default LoginPage;

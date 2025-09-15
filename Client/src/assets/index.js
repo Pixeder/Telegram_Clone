@@ -1,5 +1,3 @@
-import groupIcon from './add-group.png'
+import groupIcon from './add-group.png';
 
-export {
-  groupIcon,
-}
+export { groupIcon };

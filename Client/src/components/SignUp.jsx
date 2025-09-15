@@ -6,12 +6,16 @@ import { useNavigate, Link } from 'react-router-dom';
 
 function SignUp() {
   const navigate = useNavigate();
-  const [apiError, setApiError] = useState("");
+  const [apiError, setApiError] = useState('');
   const [uploadedFile, setUploadedFile] = useState(null);
-  const [previewURL, setPreviewURL] = useState("");
+  const [previewURL, setPreviewURL] = useState('');
   const [passwordShown, setPasswordShown] = useState(false);
   const [selectedAvatarUrl, setSelectedAvatarUrl] = useState('');
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
   const fileInputRef = useRef(null);
 
   const Avatars = [
@@ -24,7 +28,7 @@ function SignUp() {
 
   useEffect(() => {
     if (!uploadedFile) {
-      setPreviewURL("");
+      setPreviewURL('');
       return;
     }
     const objectURL = URL.createObjectURL(uploadedFile);
@@ -58,7 +62,7 @@ function SignUp() {
       }
 
       if (!finalAvatarUrl) {
-        setApiError("Please select an avatar or upload an image.");
+        setApiError('Please select an avatar or upload an image.');
         return;
       }
 
@@ -66,8 +70,9 @@ function SignUp() {
       await registerUser(payload);
       navigate('/login');
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "Registration failed. Please try again.";
-      console.error("Registration error:", error);
+      const errorMessage =
+        error.response?.data?.message || 'Registration failed. Please try again.';
+      console.error('Registration error:', error);
       setApiError(errorMessage);
     }
   };
@@ -77,115 +82,139 @@ function SignUp() {
   };
 
   // Determine which URL to display in the main preview
-  const displayURL = previewURL || selectedAvatarUrl || "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/800px-User-avatar.svg.png";
+  const displayURL =
+    previewURL ||
+    selectedAvatarUrl ||
+    'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/800px-User-avatar.svg.png';
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 py-12">
-      <div className="w-full max-w-lg p-8 space-y-6 bg-white rounded-2xl shadow-lg">
-        <h2 className="text-3xl font-bold text-center text-gray-800">Create your account</h2>
+    <div className='flex min-h-screen items-center justify-center bg-gray-100 py-12'>
+      <div className='w-full max-w-lg space-y-6 rounded-2xl bg-white p-8 shadow-lg'>
+        <h2 className='text-center text-3xl font-bold text-gray-800'>Create your account</h2>
 
-        {apiError && <p className="text-red-600 text-center bg-red-100 p-3 rounded-lg">{apiError}</p>}
-        
+        {apiError && (
+          <p className='rounded-lg bg-red-100 p-3 text-center text-red-600'>{apiError}</p>
+        )}
+
         {/* --- Avatar Selection Section --- */}
         <div className='flex flex-col items-center space-y-4'>
-          <p className="text-sm font-medium text-gray-600">Choose your avatar</p>
-          <img src={displayURL} className='w-24 h-24 rounded-full object-cover border-4 border-gray-200' alt="Selected Avatar" />
-          
+          <p className='text-sm font-medium text-gray-600'>Choose your avatar</p>
+          <img
+            src={displayURL}
+            className='h-24 w-24 rounded-full border-4 border-gray-200 object-cover'
+            alt='Selected Avatar'
+          />
+
           <div className='flex space-x-3'>
             {Avatars.map((avatar, index) => (
-              <img 
-                src={avatar} 
-                alt={`Default Avatar ${index + 1}`} 
-                key={index} 
-                className={`w-12 h-12 rounded-full cursor-pointer transition-transform transform hover:scale-110 ${selectedAvatarUrl === avatar ? 'border-4 border-blue-500' : 'border-2 border-gray-300'}`} 
-                onClick={() => onSelectAvatar(avatar)} 
+              <img
+                src={avatar}
+                alt={`Default Avatar ${index + 1}`}
+                key={index}
+                className={`h-12 w-12 transform cursor-pointer rounded-full transition-transform hover:scale-110 ${selectedAvatarUrl === avatar ? 'border-4 border-blue-500' : 'border-2 border-gray-300'}`}
+                onClick={() => onSelectAvatar(avatar)}
               />
             ))}
           </div>
-          <div className="text-center">
-            <p className="text-sm text-gray-500 mb-2">Or upload your own</p>
-            <Input type="file" ref={fileInputRef} onChange={onChangeUploadedFile} className="hidden" accept="image/*" />
-            <Button type="button" onClick={() => fileInputRef.current.click()} bgColor="bg-gray-200" textColor="text-black">
+          <div className='text-center'>
+            <p className='mb-2 text-sm text-gray-500'>Or upload your own</p>
+            <Input
+              type='file'
+              ref={fileInputRef}
+              onChange={onChangeUploadedFile}
+              className='hidden'
+              accept='image/*'
+            />
+            <Button
+              type='button'
+              onClick={() => fileInputRef.current.click()}
+              bgColor='bg-gray-200'
+              textColor='text-black'
+            >
               Upload a file
             </Button>
           </div>
         </div>
-        
+
         {/* --- Form Section --- */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
           {/* Assuming you have a 'fullName' field in your User model */}
           <div>
-            <Input 
-              label="Full Name"
-              placeholder="Enter your Full Name"
-              type="text"
-              {...register("fullName", { required: "Name is required" })} 
+            <Input
+              label='Full Name'
+              placeholder='Enter your Full Name'
+              type='text'
+              {...register('fullName', { required: 'Name is required' })}
             />
-            {errors.fullName && <p className="text-red-600 mt-1 text-sm">{errors.fullName.message}</p>}
+            {errors.fullName && (
+              <p className='mt-1 text-sm text-red-600'>{errors.fullName.message}</p>
+            )}
           </div>
           <div>
             <Input
-              label="Username"
-              type="text"
-              placeholder="Enter your username"
-              {...register('username', { required: "Username is required" })}
+              label='Username'
+              type='text'
+              placeholder='Enter your username'
+              {...register('username', { required: 'Username is required' })}
             />
-            {errors.username && <p className="text-red-600 mt-1 text-sm">{errors.username.message}</p>}
+            {errors.username && (
+              <p className='mt-1 text-sm text-red-600'>{errors.username.message}</p>
+            )}
           </div>
           <div>
             <Input
-              label="Email"
-              type="email"
-              placeholder="Enter your email"
+              label='Email'
+              type='email'
+              placeholder='Enter your email'
               {...register('email', {
-                required: "Email is required",
+                required: 'Email is required',
                 pattern: {
                   value: /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
-                  message: "Please enter a valid email address"
-                }
+                  message: 'Please enter a valid email address',
+                },
               })}
             />
-            {errors.email && <p className="text-red-600 mt-1 text-sm">{errors.email.message}</p>}
+            {errors.email && <p className='mt-1 text-sm text-red-600'>{errors.email.message}</p>}
           </div>
           <div>
             <Input
-              label="Password"
-              type={passwordShown ? "text" : "password"}
-              placeholder="Enter your password"
+              label='Password'
+              type={passwordShown ? 'text' : 'password'}
+              placeholder='Enter your password'
               {...register('password', {
-                required: "Password is required",
+                required: 'Password is required',
                 minLength: {
                   value: 8,
-                  message: "Password must be at least 8 characters"
-                }
+                  message: 'Password must be at least 8 characters',
+                },
               })}
             />
-            {errors.password && <p className="text-red-600 mt-1 text-sm">{errors.password.message}</p>}
+            {errors.password && (
+              <p className='mt-1 text-sm text-red-600'>{errors.password.message}</p>
+            )}
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className='flex items-center space-x-2'>
             <input
-              id="show-password-checkbox"
-              type="checkbox"
+              id='show-password-checkbox'
+              type='checkbox'
               checked={passwordShown}
               onChange={togglePasswordVisibility}
-              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+              className='h-4 w-4 rounded border-gray-300 bg-gray-100 text-blue-600 focus:ring-blue-500'
             />
             <label
-              htmlFor="show-password-checkbox"
-              className="text-sm font-medium text-gray-700 cursor-pointer"
+              htmlFor='show-password-checkbox'
+              className='cursor-pointer text-sm font-medium text-gray-700'
             >
               Show Password
             </label>
           </div>
 
-          <Button type="submit">
-            Create Account
-          </Button>
+          <Button type='submit'>Create Account</Button>
         </form>
-        <p className="text-center text-sm">
+        <p className='text-center text-sm'>
           Already have an account?{' '}
-          <Link to="/login" className="font-medium text-blue-600 hover:underline">
+          <Link to='/login' className='font-medium text-blue-600 hover:underline'>
             Log in
           </Link>
         </p>

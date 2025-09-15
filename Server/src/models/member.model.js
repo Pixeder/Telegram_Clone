@@ -1,16 +1,16 @@
-import { Schema ,model } from 'mongoose'
+import { Schema, model } from 'mongoose';
 
 const memberSchema = new Schema(
   {
     groupId: {
       type: Schema.Types.ObjectId,
-      ref: "Group",
+      ref: 'Group',
       required: true,
       trim: true,
     },
     userId: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
       trim: true,
     },
@@ -19,9 +19,9 @@ const memberSchema = new Schema(
     },
     isCreatedByUser: {
       type: Boolean,
-    }
+    },
   },
-  {timestamps: true}
-)
+  { timestamps: true }
+);
 
-export const Member = model("Member" , memberSchema);
+export const Member = model('Member', memberSchema);

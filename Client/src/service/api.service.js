@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // The base client configuration is perfect.
 const apiClient = axios.create({
-  baseURL: "http://localhost:8000/api/v1",
+  baseURL: 'http://localhost:8000/api/v1',
   withCredentials: true,
   timeout: 5000, // Increased timeout for file uploads
 });
@@ -10,24 +10,24 @@ const apiClient = axios.create({
 // --- User and Auth Functions ---
 export const registerUser = (data) => {
   // We set Content-Type here because the default is application/json
-  return apiClient.post("/users/register", data, {
+  return apiClient.post('/users/register', data, {
     headers: {
-      "Content-Type": "application/json",
-    }
+      'Content-Type': 'application/json',
+    },
   });
 };
 
 export const loginUser = (data) => {
-  return apiClient.post("/users/login", data);
+  return apiClient.post('/users/login', data);
 };
 
 export const logoutUser = () => {
-  return apiClient.post("/users/logout");
+  return apiClient.post('/users/logout');
 };
 
 // 1. CORRECTED: The route for getting all users is simply GET /users
 export const getUserList = () => {
-  return apiClient.get("/users/");
+  return apiClient.get('/users/');
 };
 
 // --- Message Functions ---
@@ -41,16 +41,16 @@ export const getGroupMessages = (groupId) => {
 };
 
 export const getGroupsMembersData = async (groupId) => {
-  return await apiClient.get(`/groups/${groupId}/members`)
-}
+  return await apiClient.get(`/groups/${groupId}/members`);
+};
 
 // --- Group Functions ---
 export const createGroup = (data) => {
-  return apiClient.post("/groups/", data);
+  return apiClient.post('/groups/', data);
 };
 
 export const getGroups = () => {
-  return apiClient.get("/groups/");
+  return apiClient.get('/groups/');
 };
 
 // --- File Upload Function ---
@@ -58,19 +58,19 @@ export const getGroups = () => {
 export const uploadSignUpAvatar = async (file) => {
   const formData = new FormData();
   // The field name "file" MUST match what the backend (Multer) expects
-  formData.append("file", file);
+  formData.append('file', file);
 
   try {
     // 4. CORRECTED: The URL must match the backend route exactly.
-    const response = await apiClient.post("/files/uploadSignUpAvatar", formData, {
+    const response = await apiClient.post('/files/uploadSignUpAvatar', formData, {
       headers: {
-        "Content-Type": "multipart/form-data",
+        'Content-Type': 'multipart/form-data',
       },
     });
     // Return just the data part of the response for easier use in components
-    return response.data.data; 
+    return response.data.data;
   } catch (error) {
-    console.error("Error uploading file:", error);
+    console.error('Error uploading file:', error);
     // Re-throw the error so the component's catch block can handle it
     throw error;
   }
@@ -78,18 +78,18 @@ export const uploadSignUpAvatar = async (file) => {
 
 export const uploadFile = async (file) => {
   const formData = new FormData();
-  formData.append('file' , file);
+  formData.append('file', file);
 
   try {
-    const response = await apiClient.post("/files/upload" , formData , {
+    const response = await apiClient.post('/files/upload', formData, {
       headers: {
-          "Content-Type": "multipart/form-data",
+        'Content-Type': 'multipart/form-data',
       },
-    })
-  
+    });
+
     return response.data.data;
   } catch (error) {
-    console.error("Error uploading file:", error);
+    console.error('Error uploading file:', error);
     throw error;
   }
-}
+};
