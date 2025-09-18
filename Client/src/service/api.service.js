@@ -7,6 +7,16 @@ const apiClient = axios.create({
   timeout: 5000, // Increased timeout for file uploads
 });
 
+apiClient.interceptors.response.use(function(response){
+  return response;
+},(error) => {
+   if (error.response?.status === 401) {
+      console.log("SESSION EXPIRED! Dispatching logout.");
+      store.dispatch(logout());
+    }
+    return Promise.reject(error);
+})
+
 // --- User and Auth Functions ---
 export const registerUser = (data) => {
   // We set Content-Type here because the default is application/json
