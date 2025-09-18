@@ -38,12 +38,12 @@ function Profile({ onClose }) {
   const chatUsername = !isGroupChat && selectedChat.username;
 
   return (
-    // Backdrop Overlay
-    <div onClick={onClose} ref={profileRef} className='bg-opacity-30  h-screen z-4'>
+   <>
+    <div ref={profileRef} className='w-[40%]'>
       {/* Profile Panel */}
       <div
         onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the panel
-        className='bottom-0 right-0 z-50 h-full w-full max-w-sm transform bg-white shadow-xl transition-transform duration-300 ease-in-out'
+        className='bottom-0 right-0 z-50 h-screen w-full max-w-sm transform bg-gray-100 border-l border-gray-200 transition-transform duration-300 ease-in-out'
       >
         <div className='flex h-full flex-col'>
           {/* Header */}
@@ -106,6 +106,7 @@ function Profile({ onClose }) {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
