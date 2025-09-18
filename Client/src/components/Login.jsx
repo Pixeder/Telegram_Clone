@@ -20,17 +20,20 @@ function Login() {
 
   const onSubmit = async (userData) => {
     setApiError('');
+    const lastOnline = Date.now();
     try {
-      const response = await loginUser(userData);
+      const updatedUserData = {...userData , lastOnline}
+      const response = await loginUser(updatedUserData);
       const { user, accessToken } = response.data.data;
       const token = accessToken;
-      // The token from the response body is used for the Redux store
       dispatch(login({ user, token }));
       navigate('/');
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message || 'Login failed. Please check your credentials.';
-      console.error('Login error:', error.response);
+        error.response?.data?.message || error.message || 'Login failed. Please check your credentials or try again later.';
+      console.error('Login error:', error.response || error); // Log the response if available, otherwise the full error
+      setApiError(errorMessage);
+
       setApiError(errorMessage);
     }
   };

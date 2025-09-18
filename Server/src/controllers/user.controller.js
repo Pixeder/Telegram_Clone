@@ -35,7 +35,7 @@ const generateAccessAndRefreshToken = async (userId) => {
 };
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { username, email, password, fullName, avatarURL } = req.body;
+  const { username, email, password, fullName, avatarURL, lastOnline } = req.body;
 
   if ([username, email, password, fullName].some((field) => field?.trim() === '')) {
     throw new apiError(400, 'All fields are required');
@@ -55,11 +55,13 @@ const registerUser = asyncHandler(async (req, res) => {
     password,
     fullName,
     avatarURL,
+    lastOnline
   });
 
   const createdUser = user.toObject();
   delete createdUser.password;
   delete createdUser.refreshToken;
+  delete createdUser.lastOnline;
 
   if (!createdUser) {
     throw new ApiError(500, 'Something went wrong while registering the user');
@@ -69,13 +71,14 @@ const registerUser = asyncHandler(async (req, res) => {
 });
 
 const loginUser = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, lastOnline } = req.body;
+  console.log(lastOnline)
 
   if ([email, password].some((field) => field?.trim() === '')) {
     throw new apiError(400, 'All fields are required');
   }
 
-  const user = await User.findOne({ email });
+  const user = await User.findOneAndUpdate({ email } , {$set: {lastOnline}} , {returnDocument: "after"});
 
   if (!user) {
     throw new apiError(404, 'User with entered email not exist');
@@ -89,6 +92,7 @@ const loginUser = asyncHandler(async (req, res) => {
   const createdUser = user.toObject();
   delete createdUser.password;
   delete createdUser.refreshToken;
+  delete createdUser.lastOnline;
 
   if (!createdUser) {
     throw new apiError(400, 'Something went wrong in logging in user');

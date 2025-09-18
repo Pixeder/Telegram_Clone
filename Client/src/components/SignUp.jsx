@@ -66,7 +66,9 @@ function SignUp() {
         return;
       }
 
-      const payload = { ...data, avatarURL: finalAvatarUrl };
+      const lastOnline = Date.now();
+
+      const payload = { ...data, avatarURL: finalAvatarUrl, lastOnline };
       await registerUser(payload);
       navigate('/login');
     } catch (error) {

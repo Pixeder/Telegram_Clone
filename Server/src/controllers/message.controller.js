@@ -19,6 +19,7 @@ const getUserMessages = asyncHandler(async (req, res) => {
       { senderId: recipientId, recieverId: senderId },
     ],
   }).sort({ createdAt: 'asc' });
+  console.log(converstion[0].updatedAt.getTime())
 
   return res.status(200).json(new apiResponse(200, converstion, 'Messages fetched successfully'));
 });
@@ -26,7 +27,7 @@ const getUserMessages = asyncHandler(async (req, res) => {
 const getGroupMessages = asyncHandler(async (req, res) => {
   const groupId = req.params.groupId;
   const senderId = req.user?._id;
-  console.log(groupId);
+  // console.log(groupId);
 
   if (!groupId && !mongoose.Types.ObjectId.isValid(groupId)) {
     throw new apiError(401, 'Invalid group Id or not found');

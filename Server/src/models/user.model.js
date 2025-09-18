@@ -40,6 +40,10 @@ const userSchema = Schema(
       type: String,
       minlength: 8,
     },
+    lastOnline: {
+      type: Date,
+      required: true,
+    },
     refreshToken: {
       type: String,
       default: '',
