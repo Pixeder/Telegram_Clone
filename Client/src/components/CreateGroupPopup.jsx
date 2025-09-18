@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { createGroup } from '../service/api.service';
 import { useNavigate } from 'react-router-dom';
+import onOutsideClick from '../utils/onOutsideClick';
 
 // 1. The component now accepts an `onClose` prop to allow the parent to close it.
 function CreateGroupPopup({ onClose }) {
@@ -15,6 +16,7 @@ function CreateGroupPopup({ onClose }) {
     handleSubmit,
     formState: { errors },
   } = useForm();
+  const createGroupRef = onOutsideClick(onClose);
 
   // 2. Improved member selection logic: Toggles selection on click.
   const handleToggleMember = (userId) => {
@@ -57,7 +59,7 @@ function CreateGroupPopup({ onClose }) {
     // 3. Modal Overlay: Covers the screen with a semi-transparent backdrop
     <div className='bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm'>
       {/* Modal Card */}
-      <div className='flex w-full max-w-md flex-col rounded-lg bg-white p-6 shadow-xl'>
+      <div className='flex w-full max-w-md flex-col rounded-lg bg-white p-6 shadow-xl' ref={createGroupRef}>
         {/* Modal Header */}
         <div className='mb-4 flex items-center justify-between'>
           <h2 className='text-xl font-bold'>Create New Group</h2>

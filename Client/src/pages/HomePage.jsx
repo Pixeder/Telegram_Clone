@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { UserSideBar, ChatWindow, CreateGroupPopup, Profile, IconSidebar } from '../components/index';
 import { setIsProfileOpen } from '../store/chatSlice';
 import { useSelector, useDispatch } from 'react-redux';
+import useOutsideClick from '../utils/onOutsideClick';
 
 function HomePage() {
   const dispatch = useDispatch();

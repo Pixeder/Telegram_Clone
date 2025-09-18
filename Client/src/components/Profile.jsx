@@ -1,55 +1,49 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { getGroupsMembersData } from '../service/api.service'; // You will need to create this API service function
+import onOutsideClick from '../utils/onOutsideClick';
 
 function Profile({ onClose }) {
-  // 1. Get the selected chat from the Redux store
   const { currentUserOrGroup: selectedChat } = useSelector((state) => state.chat);
 
-  // 2. State to hold the detailed member data for groups
   const [membersData, setMembersData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const profileRef = onOutsideClick(onClose);
 
-  // 3. Determine if the selected chat is a group
   const isGroupChat = selectedChat && 'groupName' in selectedChat;
 
-  // 4. CORRECTED useEffect for fetching data
   useEffect(() => {
-    // Define the async function inside the effect
     const fetchGroupMembers = async () => {
-      // Only fetch if it's a group chat
       if (isGroupChat && selectedChat?._id) {
         setIsLoading(true);
         try {
-          // Call the new API service function
           const response = await getGroupsMembersData(selectedChat._id);
           setMembersData(response.data.data);
         } catch (error) {
           console.error('Failed to fetch group members:', error);
-          setMembersData([]); // Reset on error
+          setMembersData([]);
         } finally {
           setIsLoading(false);
         }
       } else {
-        setMembersData([]); // Clear members if it's not a group chat
+        setMembersData([]);
       }
     };
 
     fetchGroupMembers();
-  }, [selectedChat, isGroupChat]); // Correct dependency array
+  }, [selectedChat, isGroupChat]);
 
-  // 5. Dynamic data based on chat type
   const chatName = isGroupChat ? selectedChat.groupName : selectedChat.fullName;
   const chatAvatar = isGroupChat ? selectedChat.avatarURL : selectedChat.avatarURL;
   const chatUsername = !isGroupChat && selectedChat.username;
 
   return (
     // Backdrop Overlay
-    <div onClick={onClose} className='bg-opacity-30 fixed inset-0 z-4 '>
+    <div onClick={onClose} ref={profileRef} className='bg-opacity-30  h-screen z-4'>
       {/* Profile Panel */}
       <div
         onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the panel
-        className='fixed bottom-0 right-0 z-50 h-full w-full max-w-sm transform bg-white shadow-xl transition-transform duration-300 ease-in-out'
+        className='bottom-0 right-0 z-50 h-full w-full max-w-sm transform bg-white shadow-xl transition-transform duration-300 ease-in-out'
       >
         <div className='flex h-full flex-col'>
           {/* Header */}
@@ -87,7 +81,7 @@ function Profile({ onClose }) {
               {isLoading ? (
                 <p className='p-4 text-gray-500'>Loading members...</p>
               ) : (
-                // 6. CORRECTED and styled member mapping
+                
                 membersData.map((member) => (
                   <div key={member._id} className='flex items-center px-4 py-3 hover:bg-gray-50'>
                     <img
