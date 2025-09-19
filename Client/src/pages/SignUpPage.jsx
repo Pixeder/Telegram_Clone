@@ -4,9 +4,7 @@ import { SignUp } from '../components';
 
 function SignUpPage() {
   return (
-    <Container>
       <SignUp />
-    </Container>
   );
 }
 

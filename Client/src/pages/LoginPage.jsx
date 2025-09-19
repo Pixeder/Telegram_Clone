@@ -4,9 +4,7 @@ import { Login } from '../components/index';
 
 function LoginPage() {
   return (
-    <Container>
       <Login />
-    </Container>
   );
 }
 

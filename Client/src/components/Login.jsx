@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import { login } from '../store/authSlice';
 import { loginUser } from '../service/api.service';
 import { useNavigate, Link } from 'react-router-dom';
+import { motion } from 'motion/react';
 
 function Login() {
   const dispatch = useDispatch();
@@ -44,70 +45,83 @@ function Login() {
   };
 
   return (
-    <div className='flex min-h-screen items-center justify-center bg-gray-100'>
-      <div className='w-full max-w-md space-y-6 rounded-lg bg-white p-8 shadow-md'>
-        <h2 className='text-center text-2xl font-bold'>Log in to your account</h2>
-
-        {apiError && <p className='text-center text-red-600'>{apiError}</p>}
-
-        <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
-          <div>
-            <Input
-              label='Email'
-              type='email'
-              placeholder='Enter your email'
-              {...register('email', {
-                required: 'Email is required',
-                pattern: {
-                  value: /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
-                  message: 'Please enter a valid email address',
-                },
-              })}
-            />
-            {errors.email && <p className='mt-1 text-sm text-red-600'>{errors.email.message}</p>}
-          </div>
-          <div>
-            <Input
-              label='Password'
-              // 3. The input type is now controlled by our state
-              type={passwordShown ? 'text' : 'password'}
-              placeholder='Enter your password'
-              {...register('password', {
-                required: 'Password is required',
-              })}
-            />
-            {errors.password && (
-              <p className='mt-1 text-sm text-red-600'>{errors.password.message}</p>
-            )}
-          </div>
-
-          {/* 4. Styled "Show Password" Checkbox */}
-          <div className='flex items-center space-x-2'>
-            <input
-              id='show-password-checkbox'
-              type='checkbox'
-              checked={passwordShown}
-              onChange={togglePasswordVisibility}
-              className='h-4 w-4 rounded border-gray-300 bg-gray-100 text-blue-600 focus:ring-blue-500'
-            />
-            <label
-              htmlFor='show-password-checkbox'
-              className='cursor-pointer text-sm font-medium text-gray-700'
-            >
-              Show Password
-            </label>
-          </div>
-
-          <Button type='submit'>Login</Button>
-        </form>
-        <p className='text-center text-sm'>
-          Don't have an account?{' '}
-          <Link to='/register' className='font-medium text-blue-600 hover:underline'>
-            Sign up
-          </Link>
-        </p>
+    // --- Start of restyled JSX block ---
+  <div className='flex min-h-screen items-center justify-center bg-gray-100 p-4 dark:bg-slate-900'>
+    <motion.div
+      // Animation for the card fading in
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      // Styling with dark mode classes
+      className='w-full max-w-md space-y-6 rounded-lg bg-white p-8 shadow-md dark:bg-slate-800'
+    >
+      <div className="text-center">
+        <h2 className='text-2xl font-bold text-gray-800 dark:text-white'>Log in to your account</h2>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Welcome back!</p>
       </div>
-    </div>
+
+
+      {apiError && <p className='text-center text-red-600'>{apiError}</p>}
+
+      <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
+        <div>
+          <Input
+            label='Email'
+            type='email'
+            placeholder='Enter your email'
+            {...register('email', {
+              required: 'Email is required',
+              pattern: {
+                value: /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
+                message: 'Please enter a valid email address',
+              },
+            })}
+          />
+          {errors.email && <p className='mt-1 text-sm text-red-600'>{errors.email.message}</p>}
+        </div>
+        <div>
+          <Input
+            label='Password'
+            type={passwordShown ? 'text' : 'password'}
+            placeholder='Enter your password'
+            {...register('password', {
+              required: 'Password is required',
+            })}
+          />
+          {errors.password && (
+            <p className='mt-1 text-sm text-red-600'>{errors.password.message}</p>
+          )}
+        </div>
+
+        <div className='flex items-center space-x-2'>
+          <input
+            id='show-password-checkbox'
+            type='checkbox'
+            checked={passwordShown}
+            onChange={togglePasswordVisibility}
+            className='h-4 w-4 rounded border-gray-300 bg-gray-100 text-sky-600 focus:ring-sky-500 dark:bg-slate-600 dark:border-slate-500'
+          />
+          <label
+            htmlFor='show-password-checkbox'
+            className='cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300'
+          >
+            Show Password
+          </label>
+        </div>
+        
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button type='submit' className="w-full font-semibold">Login</Button>
+        </motion.div>
+      </form>
+      <p className='text-center text-sm text-gray-600 dark:text-gray-400'>
+        Don't have an account?{' '}
+        <Link to='/register' className='font-medium text-sky-600 hover:underline dark:text-sky-400'>
+          Sign up
+        </Link>
+      </p>
+    </motion.div>
+  </div>
+  // --- End of restyled JSX block ---
   );
 }
 

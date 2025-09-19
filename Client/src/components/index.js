@@ -9,8 +9,10 @@ import CreateGroupPopup from './CreateGroupPopup';
 import Profile from './Profile';
 import FileUploadModal from './FileUploadModal';
 import IconSidebar from './IconSideBar';
+import DarkModeButton from './DarkModeButton';
 
 export {
+  DarkModeButton,
   IconSidebar,
   FileUploadModal,
   ChatWindow,

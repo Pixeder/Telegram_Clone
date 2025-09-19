@@ -19,7 +19,6 @@ const getUserMessages = asyncHandler(async (req, res) => {
       { senderId: recipientId, recieverId: senderId },
     ],
   }).sort({ createdAt: 'asc' });
-  console.log(converstion[0].updatedAt.getTime())
 
   return res.status(200).json(new apiResponse(200, converstion, 'Messages fetched successfully'));
 });
