@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUserList, getGroups } from '../service/api.service';
-import { setUsers, setCurrentUserOrGroup, setGroups } from '../store/chatSlice';
-import { motion } from 'motion/react'; 
+import { setUsers, setCurrentUserOrGroup, setGroups, clearNotification } from '../store/chatSlice';
+import { motion, AnimatePresence } from 'motion/react'; 
 import { Button, Input } from './ui';
 import { useForm } from 'react-hook-form';
 // --- SVG Icons for UI ---
@@ -47,7 +47,7 @@ const itemVariants = {
 function UserSideBar({ onOpenCreateGroup }) {
     // --- ALL YOUR EXISTING LOGIC REMAINS UNTOUCHED ---
     const dispatch = useDispatch();
-    const { users, groups, currentUserOrGroup, onlineUsers } = useSelector((state) => state.chat);
+    const { users, groups, currentUserOrGroup, onlineUsers, notifications } = useSelector((state) => state.chat);
     const [ selectedChat , setSelectedChat ] = useState('allchat');
     const { register , handleSubmit } = useForm()
 
@@ -66,6 +66,7 @@ function UserSideBar({ onOpenCreateGroup }) {
 
     const handleSelect = (item) => {
         dispatch(setCurrentUserOrGroup(item));
+        dispatch(clearNotification(item._id));
     };
 
     // --- END OF UNTOUCHED LOGIC ---
@@ -120,20 +121,38 @@ function UserSideBar({ onOpenCreateGroup }) {
                 {selectedChat === 'groups' && groups && groups.length > 0 && (
                      <div className="p-2">
                         <h3 className="px-2 pt-2 text-xs font-bold uppercase text-gray-400 dark:text-gray-500 tracking-wider">Groups</h3>
-                        {groups.map((group) => (
-                             <motion.div
-                                key={group._id} 
-                                variants={itemVariants}
-                                onClick={() => handleSelect(group)}
-                                className={`flex items-center p-2 rounded-lg cursor-pointer transition-colors duration-200 mt-1 ${currentUserOrGroup?._id === group._id ? 'bg-sky-100 dark:bg-sky-900' : 'hover:bg-gray-100 dark:hover:bg-slate-700'}`}>
-                                <div className="relative mr-3">
-                                    <img src={group.avatarURL} alt={group.groupName} className="w-10 h-10 rounded-full object-cover" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <span className={`font-semibold truncate block ${currentUserOrGroup?._id === group._id ? 'text-sky-800 dark:text-sky-200' : 'text-gray-800 dark:text-gray-200'}`}>{group.groupName}</span>
-                                </div>
-                             </motion.div>
-                        ))}
+                        {groups.map((group) => {
+                            // 2. Get the notification count for this group
+                            const notificationCount = notifications[group._id] || 0;
+                            return (
+                                <motion.div
+                                    key={group._id}
+                                    variants={itemVariants}
+                                    onClick={() => handleSelect(group)}
+                                    className={`flex items-center p-2 rounded-lg cursor-pointer transition-colors duration-200 mt-1 ${currentUserOrGroup?._id === group._id ? 'bg-sky-100 dark:bg-sky-900' : 'hover:bg-gray-100 dark:hover:bg-slate-700'}`}
+                                >
+                                    <div className="relative mr-3">
+                                        <img src={group.avatarURL} alt={group.groupName} className="w-10 h-10 rounded-full object-cover" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <span className={`font-semibold truncate block ${currentUserOrGroup?._id === group._id ? 'text-sky-800 dark:text-sky-200' : 'text-gray-800 dark:text-gray-200'}`}>{group.groupName}</span>
+                                    </div>
+                                    {/* 3. Render the notification badge */}
+                                    <AnimatePresence>
+                                        {notificationCount > 0 && (
+                                            <motion.span
+                                                initial={{ scale: 0 }}
+                                                animate={{ scale: 1 }}
+                                                exit={{ scale: 0 }}
+                                                className="w-5 h-5 flex items-center justify-center text-xs font-bold text-white bg-sky-500 rounded-full"
+                                            >
+                                                {notificationCount}
+                                            </motion.span>
+                                        )}
+                                    </AnimatePresence>
+                                </motion.div>
+                            );
+                        })}
                     </div>
                 )}
 
@@ -142,20 +161,36 @@ function UserSideBar({ onOpenCreateGroup }) {
                     <h3 className="px-2 pt-2 text-xs font-bold uppercase text-gray-400 dark:text-gray-500 tracking-wider">Users</h3>
                     {users.map((user) => {
                         const isOnline = onlineUsers.includes(user._id);
+                        // 4. Get the notification count for this user
+                        const notificationCount = notifications[user._id] || 0;
                         return (
-                            <motion.div 
-                                key={user._id} 
+                            <motion.div
+                                key={user._id}
                                 variants={itemVariants}
                                 onClick={() => handleSelect(user)}
-                                className={`flex items-center p-2 rounded-lg cursor-pointer transition-colors duration-200 mt-1 ${currentUserOrGroup?._id === user._id ? 'bg-sky-100 dark:bg-sky-900' : 'hover:bg-gray-100 dark:hover:bg-slate-700'}`}>
+                                className={`flex items-center p-2 rounded-lg cursor-pointer transition-colors duration-200 mt-1 ${currentUserOrGroup?._id === user._id ? 'bg-sky-100 dark:bg-sky-900' : 'hover:bg-gray-100 dark:hover:bg-slate-700'}`}
+                            >
                                 <div className="relative mr-3">
                                     <img src={user.avatarURL} alt={user.username} className="w-10 h-10 rounded-full object-cover" />
                                     {isOnline && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 30 }} className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-slate-800"></motion.div>}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                     <span className={`font-semibold truncate block ${currentUserOrGroup?._id === user._id ? 'text-sky-800 dark:text-sky-200' : 'text-gray-800 dark:text-gray-200'}`}>{user.fullName}</span>
-                                     <p className={`text-xs truncate ${currentUserOrGroup?._id === user._id ? 'text-sky-600 dark:text-sky-400' : 'text-gray-500 dark:text-gray-400'}`}>Last message placeholder...</p>
+                                    <span className={`font-semibold truncate block ${currentUserOrGroup?._id === user._id ? 'text-sky-800 dark:text-sky-200' : 'text-gray-800 dark:text-gray-200'}`}>{user.fullName}</span>
+                                    <p className={`text-xs truncate ${currentUserOrGroup?._id === user._id ? 'text-sky-600 dark:text-sky-400' : 'text-gray-500 dark:text-gray-400'}`}>Last message placeholder...</p>
                                 </div>
+                                 {/* 5. Render the notification badge */}
+                                 <AnimatePresence>
+                                    {notificationCount > 0 && (
+                                        <motion.span
+                                            initial={{ scale: 0 }}
+                                            animate={{ scale: 1 }}
+                                            exit={{ scale: 0 }}
+                                            className="w-5 h-5 flex items-center justify-center text-xs font-bold text-white bg-sky-500 rounded-full"
+                                        >
+                                            {notificationCount}
+                                        </motion.span>
+                                    )}
+                                </AnimatePresence>
                             </motion.div>
                         );
                     })}

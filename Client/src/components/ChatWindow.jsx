@@ -5,10 +5,10 @@ import { Input, Button } from './ui';
 import { useForm } from 'react-hook-form';
 import connectSocket from '../service/socket.service.js';
 import EmojiPicker from 'emoji-picker-react';
-import { setOnlineUsers, setIsProfileOpen } from '../store/chatSlice';
+import { setOnlineUsers, setIsProfileOpen, addNotification, clearNotification } from '../store/chatSlice';
 import { decryptMessage, encryptMessage } from '../utils/ETEE.js';
-import { Profile, FileUploadModal } from './index.js';
-import {motion, AnimatePresence} from 'motion/react'
+import { FileUploadModal } from './index.js';
+import {motion, AnimatePresence} from 'motion/react';
 
 function ChatWindow() {
   const dispatch = useDispatch();
@@ -88,6 +88,8 @@ function ChatWindow() {
             message: decryptedMessage,
           },
         ]);
+      } else if(!isGroupChat) {
+        dispatch(addNotification(newMessage.senderId));
       }
     });
 
@@ -103,6 +105,8 @@ function ChatWindow() {
             message: decryptedMessage,
           },
         ]);
+      } else if(isGroupChat) {
+        dispatch(addNotification(newMessage.groupId));
       }
     });
 
@@ -313,12 +317,12 @@ function ChatWindow() {
           <footer className='border-t border-gray-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800'>
               <form onSubmit={handleSubmit(onSendMessage)} className='flex items-center gap-3'>
                   <div className='relative flex items-center'>
-                      <motion.Button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} type='button' onClick={() => setIsFileUploadOpen(true)} className='rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-300 dark:text-gray-400 dark:hover:bg-slate-700' title="Attach file">
+                      <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} type='button' onClick={() => setIsFileUploadOpen(true)} className='rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-300 dark:text-gray-400 dark:hover:bg-slate-700' title="Attach file">
                            {/* Attach Icon */} <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6"><path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.122 2.122l7.81-7.81" /></svg>
-                      </motion.Button>
-                      <motion.Button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} type='button' onClick={() => setShowPicker(!showPicker)} className='rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-300 dark:text-gray-400 dark:hover:bg-slate-700' title="Add emoji">
+                      </motion.button>
+                      <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} type='button' onClick={() => setShowPicker(!showPicker)} className='rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-300 dark:text-gray-400 dark:hover:bg-slate-700' title="Add emoji">
                            {/* Emoji Icon */} <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6"><path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9 9.75a.75.75 0 01.75-.75h.008a.75.75 0 010 1.5H9.75a.75.75 0 01-.75-.75zm4.5 0a.75.75 0 01.75-.75h.008a.75.75 0 010 1.5H14.25a.75.75 0 01-.75-.75z" /></svg>
-                      </motion.Button>
+                      </motion.button>
                       <AnimatePresence>
                           {showPicker && (
                               <motion.div
@@ -334,9 +338,9 @@ function ChatWindow() {
                       </AnimatePresence>
                   </div>
                   <Input placeholder='Write your message...' className='flex-1 rounded-lg border-transparent bg-gray-100 px-4 py-2 text-gray-800 transition focus:outline-none focus:ring-2 focus:ring-sky-500 hover:bg-gray-300 dark:hover:bg-slate-500 dark:bg-slate-700 dark:text-gray-200' {...register('message')} />
-                  <motion.Button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type='submit' className='rounded-lg bg-sky-500 p-3 text-white shadow-sm transition-colors hover:bg-sky-600 disabled:opacity-50' title="Send message">
+                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type='submit' className='rounded-lg bg-sky-500 p-3 text-white shadow-sm transition-colors hover:bg-sky-600 disabled:opacity-50' title="Send message">
                       {/* Send Icon */} <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6"><path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" /></svg>
-                  </motion.Button>
+                  </motion.button>
               </form>
           </footer>
       </div>
