@@ -81,6 +81,8 @@ io.on('connection', async (socket) => {
     }
   });
 
+  // console.log(onlineUsers)
+
   socket.on('private_message', async (data) => {
     const { recipientId, message, fileURL, fileType } = data;
     console.log(fileURL);

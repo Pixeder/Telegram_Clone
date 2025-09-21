@@ -1,21 +1,11 @@
 import axios from 'axios';
 
 // The base client configuration is perfect.
-const apiClient = axios.create({
+export const apiClient = axios.create({
   baseURL: 'http://localhost:8000/api/v1',
   withCredentials: true,
   timeout: 5000, // Increased timeout for file uploads
 });
-
-apiClient.interceptors.response.use(function(response){
-  return response;
-},(error) => {
-   if (error.response?.status === 401) {
-      console.log("SESSION EXPIRED! Dispatching logout.");
-      store.dispatch(logout());
-    }
-    return Promise.reject(error);
-})
 
 // --- User and Auth Functions ---
 export const registerUser = (data) => {

@@ -1,9 +1,10 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUserList, getGroups } from '../service/api.service';
 import { setUsers, setCurrentUserOrGroup, setGroups } from '../store/chatSlice';
 import { motion } from 'motion/react'; 
-import { Button } from './ui';
+import { Button, Input } from './ui';
+import { useForm } from 'react-hook-form';
 // --- SVG Icons for UI ---
 const CreateGroupIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
@@ -47,6 +48,8 @@ function UserSideBar({ onOpenCreateGroup }) {
     // --- ALL YOUR EXISTING LOGIC REMAINS UNTOUCHED ---
     const dispatch = useDispatch();
     const { users, groups, currentUserOrGroup, onlineUsers } = useSelector((state) => state.chat);
+    const [ selectedChat , setSelectedChat ] = useState('allchat');
+    const { register , handleSubmit } = useForm()
 
     useEffect(() => {
         const fetchAll = async () => {
@@ -64,6 +67,7 @@ function UserSideBar({ onOpenCreateGroup }) {
     const handleSelect = (item) => {
         dispatch(setCurrentUserOrGroup(item));
     };
+
     // --- END OF UNTOUCHED LOGIC ---
 
 
@@ -73,13 +77,15 @@ function UserSideBar({ onOpenCreateGroup }) {
             {/* Header Area */}
             <header className="p-4 flex items-center justify-between border-b border-gray-200 dark:border-slate-700 flex-shrink-0">
                 <h2 className="text-xl font-bold text-gray-800 dark:text-white">My Chats</h2>
-                <Button 
+                <div>
+                    <Button 
                     onClick={onOpenCreateGroup} 
-                    className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                    className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-400 dark:hover:bg-slate-700 transition-colors"
                     title="Create new group"
-                >
+                    >
                     <CreateGroupIcon />
                 </Button>
+                </div>
             </header>
 
             {/* Search Bar */}
@@ -88,7 +94,7 @@ function UserSideBar({ onOpenCreateGroup }) {
                     <span className="absolute inset-y-0 left-0 flex items-center pl-3">
                         <SearchIcon />
                     </span>
-                    <input 
+                    <Input 
                         type="text"
                         placeholder="Search all chats..."
                         className="w-full pl-10 pr-4 py-2 text-sm text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-slate-700 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 transition"
@@ -98,9 +104,9 @@ function UserSideBar({ onOpenCreateGroup }) {
 
             {/* Filter Tabs */}
             <div className="p-2 flex items-center space-x-2 border-b border-gray-200 dark:border-slate-700">
-                <Button className="flex-1 px-3 py-1.5 text-sm font-semibold text-white bg-sky-500 rounded-md shadow-sm">All Chats</Button>
-                <Button className="flex-1 px-3 py-1.5 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md transition-colors">Groups</Button>
-                <Button className="flex-1 px-3 py-1.5 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md transition-colors">Archived</Button>
+                <Button className="flex-1 px-3 py-1.5 text-sm font-semibold text-white bg-sky-500 rounded-md shadow-sm" onClick={() => setSelectedChat('allchat')} >All Chats</Button>
+                <Button className="flex-1 px-3 py-1.5 text-sm font-semibold text-gray-800 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-slate-700 rounded-md transition-colors" onClick={() => setSelectedChat('groups')}>Groups</Button>
+                <Button className="flex-1 px-3 py-1.5 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-slate-700 rounded-md transition-colors" onClick={() => setSelectedChat('archived')}>Archived</Button>
             </div>
             
             {/* Chat List with Animation */}
@@ -111,7 +117,7 @@ function UserSideBar({ onOpenCreateGroup }) {
                 animate="visible"
             >
                 {/* Groups Section */}
-                {groups && groups.length > 0 && (
+                {selectedChat === 'groups' && groups && groups.length > 0 && (
                      <div className="p-2">
                         <h3 className="px-2 pt-2 text-xs font-bold uppercase text-gray-400 dark:text-gray-500 tracking-wider">Groups</h3>
                         {groups.map((group) => (
@@ -132,7 +138,7 @@ function UserSideBar({ onOpenCreateGroup }) {
                 )}
 
                 {/* Users Section */}
-                 <div className="p-2">
+                 {selectedChat === 'allchat' && <div className="p-2">
                     <h3 className="px-2 pt-2 text-xs font-bold uppercase text-gray-400 dark:text-gray-500 tracking-wider">Users</h3>
                     {users.map((user) => {
                         const isOnline = onlineUsers.includes(user._id);
@@ -153,7 +159,7 @@ function UserSideBar({ onOpenCreateGroup }) {
                             </motion.div>
                         );
                     })}
-                 </div>
+                 </div>}
             </motion.div>
         </div>
     );

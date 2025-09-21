@@ -7,6 +7,7 @@ import { Provider } from 'react-redux';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AuthLayout } from './components/index.js';
 import { LoginPage, HomePage, SignUpPage, CreatGroupPage } from './pages/index.js';
+import { apiClient } from './service/api.service.js';
 
 const router = createBrowserRouter([
   {
@@ -48,6 +49,17 @@ const router = createBrowserRouter([
     ],
   },
 ]);
+
+apiClient.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            console.error("GLOBAL INTERCEPTOR: Unauthorized request. Logging out.");
+            store.dispatch(logout());
+        }
+        return Promise.reject(error);
+    }
+);
 
 createRoot(document.getElementById('root')).render(
   <Provider store={store}>
