@@ -3,9 +3,7 @@ import { Container } from '../components/ui';
 import { SignUp } from '../components';
 
 function SignUpPage() {
-  return (
-      <SignUp />
-  );
+  return <SignUp />;
 }
 
 export default SignUpPage;

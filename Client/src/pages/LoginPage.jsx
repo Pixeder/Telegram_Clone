@@ -3,9 +3,7 @@ import { Container } from '../components/ui';
 import { Login } from '../components/index';
 
 function LoginPage() {
-  return (
-      <Login />
-  );
+  return <Login />;
 }
 
 export default LoginPage;

@@ -1,4 +1,4 @@
-import React, { useState ,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input, Button } from './ui';
 import { useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
@@ -49,97 +49,101 @@ function CreateGroupPopup({ onClose }) {
     }
   };
 
-   useEffect(() => {
-        document.body.style.overflow = 'hidden';
-        return () => {
-            document.body.style.overflow = 'unset';
-        }
-    } , [])
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
 
   return (
     // 3. Modal Overlay: Covers the screen with a semi-transparent backdrop
     // --- Start of restyled JSX block ---
-  <motion.div
-    // Animation for the backdrop fading in
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    exit={{ opacity: 0 }}
-    // Styling with dark mode classes for the overlay
-    className='fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm'
-  >
     <motion.div
-      // Animation for the modal scaling and fading in
-      initial={{ scale: 0.9, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      exit={{ scale: 0.9, opacity: 0 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      // Styling for the modal panel
-      className='flex h-[90vh] max-h-[700px] w-full max-w-md flex-col rounded-lg bg-white p-6 shadow-xl dark:bg-slate-800'
-      ref={createGroupRef} // Your existing ref
+      // Animation for the backdrop fading in
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      // Styling with dark mode classes for the overlay
+      className='fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm'
     >
-      {/* Modal Header */}
-      <div className='mb-4 flex flex-shrink-0 items-center justify-between'>
-        <h2 className='text-xl font-bold text-gray-800 dark:text-white'>Create New Group</h2>
-        <motion.Button
+      <motion.div
+        // Animation for the modal scaling and fading in
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        // Styling for the modal panel
+        className='flex h-[90vh] max-h-[700px] w-full max-w-md flex-col rounded-lg bg-white p-6 shadow-xl dark:bg-slate-800'
+        ref={createGroupRef} // Your existing ref
+      >
+        {/* Modal Header */}
+        <div className='mb-4 flex flex-shrink-0 items-center justify-between'>
+          <h2 className='text-xl font-bold text-gray-800 dark:text-white'>Create New Group</h2>
+          <motion.Button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={onClose}
             className='rounded-full p-1 text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-700'
-            title="Close"
-        >
-          <svg
-            xmlns='http://www.w3.org/2000/svg'
-            fill='none'
-            viewBox='0 0 24 24'
-            strokeWidth={1.5}
-            stroke='currentColor'
-            className='h-6 w-6'
+            title='Close'
           >
-            <path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' />
-          </svg>
-        </motion.Button>
-      </div>
-
-      {apiError && <p className='mb-4 text-center text-red-600'>{apiError}</p>}
-
-      {/* Form for Group Name */}
-      <form onSubmit={handleSubmit(handleCreateGroup)} className='mb-4 flex-shrink-0'>
-        <Input
-          placeholder='Enter Group Name'
-          label='Group Name'
-          {...register('groupName', { required: 'Group Name is required' })}
-        />
-        {errors.groupName && (
-          <p className='mt-1 text-sm text-red-600'>{errors.groupName.message}</p>
-        )}
-      </form>
-
-      {/* User List for Selection */}
-      <h3 className='mb-2 flex-shrink-0 font-semibold text-gray-800 dark:text-gray-200'>Select Members</h3>
-      <div className='flex-1 space-y-2 overflow-y-auto rounded-lg border border-gray-200 bg-gray-50 p-2 dark:border-slate-700 dark:bg-slate-900/50'>
-        {users.map((user) => {
-          const isSelected = members.includes(user._id);
-          return (
-            <motion.div
-              key={user._id}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => handleToggleMember(user._id)}
-              className={`flex cursor-pointer items-center rounded-lg p-2 transition-colors ${
-                isSelected
-                  ? 'bg-sky-100 dark:bg-sky-900'
-                  : 'hover:bg-gray-200 dark:hover:bg-slate-700'
-              }`}
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              fill='none'
+              viewBox='0 0 24 24'
+              strokeWidth={1.5}
+              stroke='currentColor'
+              className='h-6 w-6'
             >
-              <img
-                src={user.avatarURL}
-                alt={user.username}
-                className='mr-3 h-10 w-10 rounded-full object-cover'
-              />
-              <span className={`flex-1 font-medium text-gray-800 dark:text-gray-200`}>{user.fullName}</span>
-              {isSelected && (
-                <motion.div initial={{ scale: 0.5 }} animate={{ scale: 1 }}>
+              <path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' />
+            </svg>
+          </motion.Button>
+        </div>
+
+        {apiError && <p className='mb-4 text-center text-red-600'>{apiError}</p>}
+
+        {/* Form for Group Name */}
+        <form onSubmit={handleSubmit(handleCreateGroup)} className='mb-4 flex-shrink-0'>
+          <Input
+            placeholder='Enter Group Name'
+            label='Group Name'
+            {...register('groupName', { required: 'Group Name is required' })}
+          />
+          {errors.groupName && (
+            <p className='mt-1 text-sm text-red-600'>{errors.groupName.message}</p>
+          )}
+        </form>
+
+        {/* User List for Selection */}
+        <h3 className='mb-2 flex-shrink-0 font-semibold text-gray-800 dark:text-gray-200'>
+          Select Members
+        </h3>
+        <div className='flex-1 space-y-2 overflow-y-auto rounded-lg border border-gray-200 bg-gray-50 p-2 dark:border-slate-700 dark:bg-slate-900/50'>
+          {users.map((user) => {
+            const isSelected = members.includes(user._id);
+            return (
+              <motion.div
+                key={user._id}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => handleToggleMember(user._id)}
+                className={`flex cursor-pointer items-center rounded-lg p-2 transition-colors ${
+                  isSelected
+                    ? 'bg-sky-100 dark:bg-sky-900'
+                    : 'hover:bg-gray-200 dark:hover:bg-slate-700'
+                }`}
+              >
+                <img
+                  src={user.avatarURL}
+                  alt={user.username}
+                  className='mr-3 h-10 w-10 rounded-full object-cover'
+                />
+                <span className={`flex-1 font-medium text-gray-800 dark:text-gray-200`}>
+                  {user.fullName}
+                </span>
+                {isSelected && (
+                  <motion.div initial={{ scale: 0.5 }} animate={{ scale: 1 }}>
                     <svg
                       xmlns='http://www.w3.org/2000/svg'
                       viewBox='0 0 24 24'
@@ -152,16 +156,16 @@ function CreateGroupPopup({ onClose }) {
                         clipRule='evenodd'
                       />
                     </svg>
-                </motion.div>
-              )}
-            </motion.div>
-          );
-        })}
-      </div>
+                  </motion.div>
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
 
-      {/* Action Button */}
-      <div className='mt-4 flex-shrink-0'>
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+        {/* Action Button */}
+        <div className='mt-4 flex-shrink-0'>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button
               type='Button'
               onClick={handleSubmit(handleCreateGroup)}
@@ -170,11 +174,11 @@ function CreateGroupPopup({ onClose }) {
             >
               Create Group ({members.length} selected)
             </Button>
-        </motion.div>
-      </div>
+          </motion.div>
+        </div>
+      </motion.div>
     </motion.div>
-  </motion.div>
-  // --- End of restyled JSX block ---
+    // --- End of restyled JSX block ---
   );
 }
 

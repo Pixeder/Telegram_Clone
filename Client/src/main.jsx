@@ -51,14 +51,14 @@ const router = createBrowserRouter([
 ]);
 
 apiClient.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        if (error.response?.status === 401) {
-            console.error("GLOBAL INTERCEPTOR: Unauthorized request. Logging out.");
-            store.dispatch(logout());
-        }
-        return Promise.reject(error);
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      console.error('GLOBAL INTERCEPTOR: Unauthorized request. Logging out.');
+      store.dispatch(logout());
     }
+    return Promise.reject(error);
+  }
 );
 
 createRoot(document.getElementById('root')).render(

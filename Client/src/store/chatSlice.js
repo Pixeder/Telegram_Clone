@@ -26,11 +26,11 @@ const chatSlice = createSlice({
     setGroups: (state, action) => {
       state.groups = action.payload;
     },
-    setIsProfileOpen: (state , action) => {
+    setIsProfileOpen: (state, action) => {
       state.isProfileOpen = action.payload;
     },
     addNotification: (state, action) => {
-      const chatId = action.payload; 
+      const chatId = action.payload;
 
       if (state.notifications[chatId]) {
         state.notifications[chatId] += 1;
@@ -40,11 +40,19 @@ const chatSlice = createSlice({
     },
 
     clearNotification: (state, action) => {
-      const chatId = action.payload; 
+      const chatId = action.payload;
       state.notifications[chatId] = 0;
     },
   },
 });
 
-export const { setUsers, setCurrentUserOrGroup, setOnlineUsers, setGroups, setIsProfileOpen, addNotification, clearNotification } = chatSlice.actions;
+export const {
+  setUsers,
+  setCurrentUserOrGroup,
+  setOnlineUsers,
+  setGroups,
+  setIsProfileOpen,
+  addNotification,
+  clearNotification,
+} = chatSlice.actions;
 export default chatSlice.reducer;

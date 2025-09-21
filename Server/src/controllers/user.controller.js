@@ -55,7 +55,7 @@ const registerUser = asyncHandler(async (req, res) => {
     password,
     fullName,
     avatarURL,
-    lastOnline
+    lastOnline,
   });
 
   const createdUser = user.toObject();
@@ -78,7 +78,11 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new apiError(400, 'All fields are required');
   }
 
-  const user = await User.findOneAndUpdate({ email } , {$set: {lastOnline}} , {returnDocument: "after"});
+  const user = await User.findOneAndUpdate(
+    { email },
+    { $set: { lastOnline } },
+    { returnDocument: 'after' }
+  );
 
   if (!user) {
     throw new apiError(404, 'User with entered email not exist');
