@@ -181,12 +181,12 @@ const removeAdmin = asyncHandler(async (req, res) => {
 
   // Only the group creator can demote other admins.
   if (group.createdBy.toString() !== req.user._id.toString()) {
-    throw new ApiError(403, 'Forbidden: Only the group creator can remove admins.');
+    return res.status(200).json(new apiResponse(200 ,{} , 'Forbidden: Only the group creator can remove admins.'))
   }
 
   // The creator cannot be removed as an admin.
   if (group.createdBy.toString() === userId.toString()) {
-    throw new ApiError(400, 'The group creator cannot be removed as an admin.');
+    return res.status(200).json(new apiResponse(200 ,{} , 'The group creator cannot be removed as an admin.'))
   }
 
   const updatedGroup = await Group.findByIdAndUpdate(
